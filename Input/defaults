@@ -1,0 +1,65 @@
+#----------------------------------------------------------------------
+# defaults file for build-antiX-iso
+#
+# This file contains almost all of the variables that determine what
+# actually gets built.  It has a middle priority in between
+# defaults-system which has the lowest priority and defaults-local
+# which has the highest
+#----------------------------------------------------------------------
+
+#this is basic version info.  used to make mx-version among other things
+BUG_REPORT_URL="https://github.com/openyellowos/"
+CODE_NAME="dandelion"
+ASCII_CODE_NAME="dandelion"
+DEBIAN_RELEASE="testing"
+DISTRO_NAME="open_Yellow_os"
+DISTRO_VERSION="0.1.0_Dandelion"
+HOME_URL="https://openyellowos.com/"
+
+#Kernel templates...comment and uncomment depending on what you are building
+#V is K_version of kernel
+#G not actually used
+#R is K_Revision
+#A is architecture.
+#Note that the templates don't use all values.
+
+#standard 64 bit
+K_REVISION="*"
+K_TEMPLATE="%V-%A"
+K_VERSION="5.18.0-2"
+UNSIGNED=""
+
+#system defaults, these end up inside the squash file system mostly
+LIVE_USER="demo"
+LOCALE="ja_JP.UTF-8"
+MIRROR="jp"
+NEW_HOSTNAME="oYo"
+RELEASE_DATE="July 20, 2022"
+TIME_ZONE="Asia/Tokyo"
+
+#DE particular items
+#X_TERM_EMULATOR="/usr/bin/xfce4-terminal.wrapper"
+#CURSOR_ICON_THEME="/usr/share/icons/DMZ-Black/cursor.theme"
+
+#options for building squashfs
+#lz4 is good for testing but large isos
+#options You need both 
+#xz use -comp xz -Xbcj x86
+#xz use -comp xz -b 262144 #use for base
+#lz4 use -comp lz4 -Xhc
+#gzip leave empty #use for full
+COMPRESSION_TYPE="xz"
+COMPRESSION_TYPE_CODE="-comp xz -Xbcj x86"
+#COMPRESSION_TYPE="lz4"
+#COMPRESSION_TYPE_CODE="-comp lz4 -Xhc"
+
+#legacy variables that don't change
+USE_UEFI=true
+MEM_TEST_BUG=
+NO_SET_HOSTNAME=""
+
+#sign isos
+SIGN_FILES="true"
+
+#default live boot options
+open_Yellow_os_LIVE_BOOT_OPTIONS="quiet splasht nosplash"

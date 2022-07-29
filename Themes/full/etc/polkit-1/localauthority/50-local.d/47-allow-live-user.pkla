@@ -1,0 +1,7 @@
+[Allow live User]
+Identity=unix-user:demo
+Action=*
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes
+

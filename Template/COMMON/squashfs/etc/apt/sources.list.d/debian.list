@@ -1,0 +1,3 @@
+deb http://ftp.jp.debian.org/debian/ testing main contrib non-free
+deb http://security.debian.org/ testing-security contrib non-free main
+deb http://ftp.jp.debian.org/debian/ testing-updates contrib non-free main

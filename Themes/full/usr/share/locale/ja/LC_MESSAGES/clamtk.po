@@ -1,0 +1,464 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: clamtk\n"
+"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2022-05-14 00:34+0900\n"
+"Last-Translator: Shinichirou Yamada <yamada_strong_yamada_nice_64bit@yahoo."
+"co.jp>\n"
+"Language-Team: Japanese <ja@li.org>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Launchpad-Export-Date: 2020-08-18 07:20+0000\n"
+"X-Generator: Poedit 3.0.1\n"
+
+msgid ""
+"\n"
+"Found %d possible %s (%d %s scanned).\n"
+"\n"
+msgstr ""
+"\n"
+"%d 個の %s を発見しました（%d %sをスキャン）\n"
+"\n"
+
+msgid "A daily definitions update is not scheduled"
+msgstr "毎日の定義アップデートのスケジュールなし"
+
+msgid "A daily definitions update is scheduled"
+msgstr "毎日の定義アップデートのスケジュールあり"
+
+msgid "A daily scan is not scheduled"
+msgstr "毎日のスキャン実行のスケジュールなし"
+
+msgid "A daily scan is scheduled"
+msgstr "毎日のスキャン実行のスケジュールあり"
+
+msgid "About"
+msgstr "ClamTkについて"
+
+msgid "Action Taken"
+msgstr "実行する"
+
+msgid "Add a directory"
+msgstr "フォルダーを追加"
+
+msgid "Advanced"
+msgstr "詳細"
+
+msgid "An update is available"
+msgstr "アップデートが利用可能です"
+
+msgid "Analysis"
+msgstr "解析"
+
+msgid "Antivirus signatures"
+msgstr "アンチウイルスのシグネチャ"
+
+msgid "Check for updates"
+msgstr "アップデートの確認"
+
+msgid "Check for updates to this program"
+msgstr "このプログラムのアップデートをチェックする"
+
+msgid "Check online for application and signature updates"
+msgstr "アプリケーションとシグネチャのアップデートをオンラインでチェックする"
+
+msgid "Check or recheck a file's reputation"
+msgstr "ファイルの評価をチェック/再チェックする"
+
+msgid "ClamAV Signatures: %d\n"
+msgstr "ClamAVシグネチャ: %d\n"
+
+msgid "ClamTk Virus Scanner"
+msgstr "ClamTkウイルススキャナー"
+
+msgid "ClamTk is a graphical front-end for Clam Antivirus"
+msgstr "ClamTkはClam Antivirusのためのグラフィカルなフロントエンドです"
+
+msgid "Cleaning up..."
+msgstr "クリーンアップしています..."
+
+msgid "Close"
+msgstr "閉じる"
+
+msgid "Complete"
+msgstr "完了しました"
+
+msgid "Configuration"
+msgstr "設定"
+
+msgid "Date"
+msgstr "日付"
+
+msgid "Delete"
+msgstr "削除"
+
+msgid "Delete file results"
+msgstr "ファイル結果を削除"
+
+msgid "Deleted"
+msgstr "削除済み"
+
+msgid "Detect packed binaries, password recovery tools, and more"
+msgstr "プログラム集やパスワードリカバリツールなどを検出します"
+
+msgid "Directories Scanned:\n"
+msgstr "フォルダーのスキャンが完了しました:\n"
+
+msgid "Directory"
+msgstr "フォルダー"
+
+msgid "Downloading..."
+msgstr "ダウンロードしています..."
+
+msgid "Edit proxy settings"
+msgstr "プロキシ設定を編集"
+
+msgid "Environment settings"
+msgstr "システムのプロキシ設定を使用する"
+
+msgid "Error"
+msgstr "エラー"
+
+msgid "Error updating: try again later"
+msgstr "アップデート中にエラー: 後でもう一度試してください"
+
+msgid "Exit"
+msgstr "終了"
+
+msgid "File"
+msgstr "ファイル"
+
+msgid "File Analysis"
+msgstr "ファイル解析"
+
+msgid "File has been saved"
+msgstr "ファイルを保存しました"
+
+msgid "File successfully submitted for analysis."
+msgstr "解析するファイルの送信が完了しました。"
+
+msgid "Files scanned: %d"
+msgstr "スキャンしたファイル: %d"
+
+msgid "Help"
+msgstr "ヘルプ"
+
+msgid "History"
+msgstr "履歴"
+
+msgid "Homepage"
+msgstr "ホームページ"
+
+msgid "Hour"
+msgstr "時"
+
+msgid "I would like to update signatures myself"
+msgstr "自分でシグネチャをアップデート"
+
+msgid "IP address or host"
+msgstr "IPアドレスまたはホスト名"
+
+msgid "Installed"
+msgstr "インストール済"
+
+msgid "Manage quarantined files"
+msgstr "隔離ファイルの管理"
+
+msgid "Minute"
+msgstr "分"
+
+msgid "My computer automatically receives updates"
+msgstr "コンピューターが自動的にアップデートを受信"
+
+msgid "Network"
+msgstr "ネットワーク"
+
+msgid "Never"
+msgstr "しない"
+
+msgid ""
+"No information exists for this file. Press OK to submit this file for "
+"analysis."
+msgstr ""
+"このファイルに関する情報がありません。解析するには、OKを押してこのファイルを"
+"送信してください。"
+
+msgid "No proxy"
+msgstr "プロキシを使用しない"
+
+msgid "No threats found"
+msgstr "脅威となるファイルは見つかりません"
+
+msgid "No threats found.\n"
+msgstr "脅威は発見されませんでした。\n"
+
+msgid "None"
+msgstr "なし"
+
+msgid "Number"
+msgstr "番号"
+
+msgid "Please choose how you will update your antivirus signatures"
+msgstr "アンチウイルスのシグネチャのアップデート方法を選択してください"
+
+msgid "Please wait..."
+msgstr "お待ちください..."
+
+msgid "Port"
+msgstr "ポート番号"
+
+msgid "Possible threats found"
+msgstr "潜在的な脅威が見つかりました"
+
+msgid "Possible threats: %d"
+msgstr "潜在的な脅威: %d"
+
+msgid "Preparing..."
+msgstr "準備しています..."
+
+msgid "Press Apply to save changes"
+msgstr "適用を押して変更点を保存してください"
+
+msgid "Print"
+msgstr "印刷"
+
+msgid "Problems opening %s..."
+msgstr "ファイル %s を開けません..."
+
+msgid "Product"
+msgstr "製品"
+
+msgid "Quarantine"
+msgstr "隔離"
+
+msgid "Quarantined"
+msgstr "隔離済み"
+
+msgid "Really delete this file (%s) ?"
+msgstr "本当にこのファイルを削除しますか?: %s"
+
+msgid "Remove a directory"
+msgstr "フォルダーを削除"
+
+msgid "Restore"
+msgstr "復元"
+
+msgid "Result"
+msgstr "結果"
+
+msgid "Results"
+msgstr "結果"
+
+msgid "Save file as..."
+msgstr "名前を付けて保存..."
+
+msgid "Save results"
+msgstr "結果を保存"
+
+msgid "Scan"
+msgstr "スキャン"
+
+msgid "Scan a directory"
+msgstr "フォルダーをスキャン"
+
+msgid "Scan a file"
+msgstr "ファイルをスキャン"
+
+msgid "Scan all files and directories within a directory"
+msgstr "フォルダーにあるすべてのファイルとフォルダーをスキャンします"
+
+msgid "Scan directories recursively"
+msgstr "ディレクトリを再帰的にスキャンする"
+
+msgid "Scan files beginning with a dot (.*)"
+msgstr "ドットで始まるファイル (.*) をスキャンする"
+
+msgid "Scan files larger than 20 MB"
+msgstr "20MB以上のファイルもスキャンする"
+
+msgid "Scan files typically hidden from view"
+msgstr "通常スキャンファイルは表示から隠されています"
+
+msgid "Scan for PUAs"
+msgstr "不要なアプリケーション(PUA)をスキャンする"
+
+msgid "Scan for threats..."
+msgstr "脅威をスキャンします..."
+
+msgid "Scan large files which are typically not examined"
+msgstr "通常は検査されない巨大ファイルをスキャンします"
+
+msgid "Scanning %s..."
+msgstr "%s をスキャンしています…"
+
+msgid "Scanning complete"
+msgstr "スキャンが完了しました"
+
+msgid "Schedule a scan or signature update"
+msgstr "スキャンまたはシグネチャのアップデートのスケジュールを設定します"
+
+msgid "Scheduler"
+msgstr "スケジュール"
+
+msgid "Select a directory"
+msgstr "フォルダーを選択してください"
+
+msgid "Select a file"
+msgstr "ファイルを選択してください"
+
+msgid "Select a time to scan your home directory"
+msgstr "ホームフォルダーをスキャンする時刻を選択"
+
+msgid "Select a time to update your signatures"
+msgstr "シグネチャをアップデートする時刻を選択してください"
+
+msgid "Set manually"
+msgstr "手動でプロキシを設定する"
+
+msgid "Set the hour using a 24 hour clock"
+msgstr "24時間表示で時間を設定"
+
+msgid "Set the scan time using a 24 hour clock"
+msgstr "24時間表示でスキャン時刻を設定してください"
+
+msgid "Settings"
+msgstr "設定"
+
+msgid "Settings saved"
+msgstr "設定を保存しました"
+
+msgid "Signature update preferences"
+msgstr "シグネチャのアップデートの設定です"
+
+msgid "Status"
+msgstr "状態"
+
+msgid "Submit file for analysis"
+msgstr "解析するファイルを送信"
+
+msgid "The antivirus signatures are outdated"
+msgstr "アンチウイルスのシグネチャが期限切れです"
+
+msgid ""
+"This section allows you to check the status of a file from Virustotal. If a "
+"file has been previously submitted, you will see the results of the scans "
+"from dozens of antivirus and security vendors. This allows you to make a "
+"more informed decision about the safety of a file.\n"
+"\n"
+"If the file has never been submitted to Virustotal, you can submit it "
+"yourself. When you resubmit the file minutes later, you should see the "
+"results.\n"
+"\n"
+"Please note you should never submit sensitive files to Virustotal.  Any "
+"uploaded file can be viewed by Virustotal customers. Do not submit anything "
+"with personal information or passwords.\n"
+"\n"
+"https://www.virustotal.com/gui/home/search"
+msgstr ""
+"このセクションではVirusTotalでファイルの安全性をチェックできます。ファイルが"
+"以前VirusTotalへ提供されている場合、数十のアンチウイルス/セキュリティベン"
+"ダーによるスキャン結果によってファイルの安全性を確認できます。\n"
+"\n"
+"ファイルがVirusTotalへ提供されたことがない場合は自分でそのファイルを提供して"
+"ください。ファイルを送信して数分待つと、結果が表示されるはずです。\n"
+"\n"
+"注意: VirusTotalの顧客は送信されたファイルを閲覧できるため、個人情報やパス"
+"ワードなどの機密情報を含むファイルは絶対に送信しないようにしてください。\n"
+"\n"
+"https://www.virustotal.com/gui/home/search"
+
+msgid "Unable to save file"
+msgstr "ファイルを保存できません"
+
+msgid "Unable to submit file: try again later"
+msgstr "ファイルを送信できません: 後でもう一度試してください"
+
+msgid "Unknown"
+msgstr "不明"
+
+msgid "Update"
+msgstr "アップデート"
+
+msgid "Update Assistant"
+msgstr "アップデートアシスタント"
+
+msgid "Update antivirus signatures"
+msgstr "アンチウイルスのシグネチャのアップデート"
+
+msgid "Updates"
+msgstr "アップデート"
+
+msgid "Updates are available"
+msgstr "アップデートが利用可能です"
+
+msgid "Uploaded files must be smaller than 32MB"
+msgstr "アップロードするファイルは32MB以下でなくてはなりません"
+
+msgid "Use heuristic scanning"
+msgstr "ヒューリスティックスキャンを使用する"
+
+msgid "Vendor"
+msgstr "ベンダー"
+
+msgid "View"
+msgstr "表示"
+
+msgid "View a file's reputation"
+msgstr "ファイルの評価を表示"
+
+msgid "View and set your preferences"
+msgstr "設定項目を表示したり設定します"
+
+msgid "View file results"
+msgstr "ファイル結果を表示"
+
+msgid "View or delete previous results"
+msgstr "以前の結果を表示/削除する"
+
+msgid "View or update scanning whitelist"
+msgstr "スキャン時のホワイトリストを表示したりアップデートします"
+
+msgid "View previous scans"
+msgstr "以前のスキャンを表示"
+
+msgid "Viewing %s"
+msgstr "%s を表示しています"
+
+msgid "Virus Scanner"
+msgstr "ウィルススキャナー"
+
+msgid "What is this?"
+msgstr "これは何?"
+
+msgid "Whitelist"
+msgstr "ホワイトリスト"
+
+msgid "You are configured to automatically receive updates"
+msgstr "アップデートを自動取得するように設定されています"
+
+msgid "You are set to automatically receive updates"
+msgstr "自動的にアップデートを受信する設定です"
+
+msgid "You do not have permissions to scan that file or directory"
+msgstr "そのファイルまたはディレクトリをスキャンする権限がありません"
+
+msgid "Your changes were saved."
+msgstr "変更点を保存しました。"
+
+msgid "file"
+msgstr "ファイル"
+
+msgid "files"
+msgstr "ファイル"
+
+msgid "threat"
+msgstr "脅威"
+
+msgid "threats"
+msgstr "脅威"
+
+msgid "Scan directory for threats..."
+msgstr "ディレクトリの脅威をスキャンします..."

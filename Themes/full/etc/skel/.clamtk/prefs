@@ -1,0 +1,13 @@
+Thorough=0
+DupeDB=1
+LastInfection=しない
+ScanHidden=1
+HTTPProxy=0
+Heuristic=0
+GUICheck=1
+SizeLimit=0
+Mounted=0
+Whitelist=
+Update=single
+TruncateLog=1
+Recursive=1

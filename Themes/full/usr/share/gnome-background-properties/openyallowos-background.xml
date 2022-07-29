@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
+<wallpapers>
+  <wallpaper deleted="false">
+    <name>openyellowos Background</name>
+    <name xml:lang="ja">openyellowos</name>
+    <filename>/usr/share/backgrounds/gnome/openYellowos-wallpaper.png</filename>
+    <options>scaled</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#ffffff</pcolor>
+    <scolor>#000000</scolor>
+  </wallpaper>
+    <wallpaper deleted="false">
+    <name>openyellowos Background2</name>
+    <name xml:lang="ja">openyellowos2</name>
+    <filename>/usr/share/backgrounds/gnome/openYellowos-wallpaper2.png</filename>
+    <options>scaled</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#ffffff</pcolor>
+    <scolor>#000000</scolor>
+  </wallpaper>
+    <wallpaper deleted="false">
+    <name>openyellowos Background3</name>
+    <name xml:lang="ja">openyellowos3</name>
+    <filename>/usr/share/backgrounds/gnome/openYellowos-wallpaper3.png</filename>
+    <options>scaled</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#ffffff</pcolor>
+    <scolor>#000000</scolor>
+  </wallpaper>
+</wallpapers>
