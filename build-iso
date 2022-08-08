@@ -1141,6 +1141,8 @@ do_stage_4() {
              addgroup wheel
              usermod -aG wheel demo
              # ADD 「User:DEMO」を「Group：Wheel」に追加 TOSHIO 2022.05.28 END
+             #システムログを参照するためにDEMOユーザーを「Group：systemd-journal」に追加
+             usermod -aG systemd-journal demo
         fi
 
         gather_say user-groups "Add $(pq $user) to $(pqn %n) group%s"
