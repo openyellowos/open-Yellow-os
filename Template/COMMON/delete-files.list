@@ -95,6 +95,7 @@ var/log/*log
 var/log/*mp
 var/log/apt/*.log
 var/log/dmesg
+usr/share/applications/kdesystemsettings.desktop
 usr/share/backgrounds/gnome/adwaita-d.jpg
 usr/share/backgrounds/gnome/adwaita-l.jpg
 usr/share/backgrounds/gnome/blobs-d.svg
