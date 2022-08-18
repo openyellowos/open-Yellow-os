@@ -26,7 +26,7 @@ HOME_URL="https://openyellowos.com/"
 #standard 64 bit
 K_REVISION="*"
 K_TEMPLATE="%V-%A"
-K_VERSION="5.18.0-3"
+K_VERSION="5.18.0-4"
 UNSIGNED=""
 
 #system defaults, these end up inside the squash file system mostly
