@@ -135,7 +135,7 @@ libpam-gnome-keyring
 libproxy1-plugin-gsettings
 libproxy1-plugin-networkmanager
 libproxy1-plugin-webkit
-libpython3.9
+libpython3.11
 librsvg2-common
 libspa-0.2-bluetooth
 linux-image-amd64
@@ -158,8 +158,10 @@ pulseaudio-module-bluetooth
 resolvconf
 rhythmbox
 rsync
+seahorse
 simple-scan
 sound-theme-freedesktop
+ssh
 sudo
 synaptic
 syslinux
