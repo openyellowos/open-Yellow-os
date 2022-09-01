@@ -1,9 +1,9 @@
-PRETTY_NAME="open.Yellow.os Dandelion (development branch)"
+PRETTY_NAME="open.Yellow.os 0.2.0(Dandelion)"
 NAME="open.Yellow.os"
-VERSION_ID="22.03"
-VERSION="22.03 (Dandelion)"
-VERSION_CODENAME=dandelion
-ID=open.Yellow.os
+VERSION_ID="0.2.0"
+VERSION="0.2.0"
+VERSION_CODENAME=Dandelion
+ID=debian
 ID_LIKE=debian
 HOME_URL="https://openyellowos.com/"
 BUG_REPORT_URL="https://github.com/openyellowos/"
