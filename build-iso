@@ -854,7 +854,7 @@ do_stage_4() {
             dpkg -i $early_deb && rm $early_deb
         done
     fi
-    
+
     # for 64 bit set multiarch
     # 64ビットセットマルチアーチ用
     if [[ $ARCH = "amd64" ]] ; then
@@ -1135,7 +1135,7 @@ do_stage_4() {
             grep -q "^$user:" /etc/group || groupadd $user
             local user_pw=$(mkpasswd -m sha-512 $user)
             useradd -s ${ISO_SHELL:="/bin/bash"} -g $user -d /home/$user -p $user_pw $user
-            
+
              # ADD 「User:DEMO」を「Group：Wheel」に追加 TOSHIO 2022.05.28 START
              # liveユーザーに管理者権限を付与
              addgroup wheel
@@ -1262,7 +1262,7 @@ do_stage_4() {
            *)
              say "Set debconf frontend: Gnome"
              debconf-set-selections < <(printf "debconf\tdebconf/frontend\tselect\tGnome\n")
-             ;; 
+             ;;
         esac
     fi
     #-----------------------------------------------------------------
@@ -1283,15 +1283,35 @@ do_stage_4() {
             touch /etc/apparmor.d/samba/smbd-shares
         fi
     fi
-    
-    #コマンド実行
-    #起動時のネットワークチェックに時間がかかるため無効化
+
+     #----------------------------
+     #コマンド実行
+     #----------------------------
+     #起動時のネットワークチェックに時間がかかるため無効化
     systemctl disable systemd-networkd-wait-online.service
     systemctl mask systemd-networkd-wait-online.service
     #flathubリポジトリを追加
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    #テーマを変更
-    update-alternatives --install /usr/share/desktop-base/active-theme desktop-theme /usr/share/desktop-base/oyo-theme 60    
+     #テーマを変更
+    update-alternatives --install /usr/share/desktop-base/active-theme desktop-theme /usr/share/desktop-base/oyo-theme 60
+    #powertopを削除
+    apt purge -y powertop
+    #Gnomeヘルプを削除
+    apt purge -y yelp yelp-xsl gnome-user-docs
+     #アイコン差し替え
+    ln -fs /usr/share/icons/gnome/16x16/places/oyo-logo-16.png /etc/alternatives/start-here-16.png
+    ln -fs /usr/share/icons/gnome/22x22/places/oyo-logo-22.png /etc/alternatives/start-here-22.png
+    ln -fs /usr/share/icons/gnome/24x24/places/oyo-logo-24.png /etc/alternatives/start-here-24.png
+    ln -fs /usr/share/icons/gnome/32x32/places/oyo-logo-32.png /etc/alternatives/start-here-32.png
+    ln -fs /usr/share/icons/gnome/48x48/places/oyo-logo-48.png /etc/alternatives/start-here-48.png
+    ln -fs /usr/share/icons/gnome/256x256/places/oyo-logo-256.png /etc/alternatives/start-here-256.png
+    ln -fs /usr/share/icons/gnome/scalable/places/oyo-logo.svg /etc/alternatives/start-here.svg
+     #不要なパッケージを削除
+    sudo apt -y autoremove
+     #システムデータベースを更新
+    sudo dconf update
+
+
 
     local update_cmd=updatedb
     say "Run $update_cmd"
@@ -4015,7 +4035,7 @@ is_distro_flav() {
     fi
     #
     return 0
-	
+
     #case $flav in
     #     mx32|mx64|mxahs|mxkde|mxbase64|mxbase32|mxflux32|mxflux64|mxworkbench32|mxworkbench64) return 0 ;;
     #esac
