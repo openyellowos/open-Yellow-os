@@ -13,7 +13,7 @@ CODE_NAME="dandelion"
 ASCII_CODE_NAME="dandelion"
 DEBIAN_RELEASE="testing"
 DISTRO_NAME="open_Yellow_os"
-DISTRO_VERSION="0.1.1_Dandelion"
+DISTRO_VERSION="0.2.0"
 HOME_URL="https://openyellowos.com/"
 
 #Kernel templates...comment and uncomment depending on what you are building
@@ -34,7 +34,7 @@ LIVE_USER="demo"
 LOCALE="ja_JP.UTF-8"
 MIRROR="jp"
 NEW_HOSTNAME="oYo"
-RELEASE_DATE="August 11, 2022"
+RELEASE_DATE="August 31, 2022"
 TIME_ZONE="Asia/Tokyo"
 
 #DE particular items
@@ -59,7 +59,7 @@ MEM_TEST_BUG=
 NO_SET_HOSTNAME=""
 
 #sign isos
-SIGN_FILES="true"
+SIGN_FILES="false"
 
 #default live boot options
 open_Yellow_os_LIVE_BOOT_OPTIONS="quiet splasht nosplash"
