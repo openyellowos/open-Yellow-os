@@ -1,8 +1,5 @@
 [Default Applications]
-x-scheme-handler/http=org.ablaze.floorp.desktop
-text/html=org.ablaze.floorp.desktop
-application/xhtml+xml=org.ablaze.floorp.desktop
-x-scheme-handler/https=org.ablaze.floorp.desktop
+application/vnd.debian.binary-package=gdebi.desktop
 text/calendar=org.gnome.Calendar.desktop
 audio/x-vorbis+ogg=org.gnome.Rhythmbox3.desktop
 audio/ogg=vlc.desktop
