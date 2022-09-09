@@ -383,6 +383,14 @@ function getPosition() {
     return position;
 }
 
+function getAlignment() {
+    return [
+        Clutter.ActorAlign.CENTER,
+        Clutter.ActorAlign.START,
+        Clutter.ActorAlign.END
+    ][Docking.DockManager.settings.dockAlignment];
+}
+
 function getPreviewScale() {
     return Docking.DockManager.settings.previewSizeScale;
 }
@@ -564,7 +572,7 @@ class CancellableChild extends Gio.Cancellable {
     }
 
     _connectToParent() {
-        this._connectId = this?.parent.connect(() => {
+        this._connectId = this.parent?.connect(() => {
             this._realCancel();
 
             if (this._disconnectIdle)

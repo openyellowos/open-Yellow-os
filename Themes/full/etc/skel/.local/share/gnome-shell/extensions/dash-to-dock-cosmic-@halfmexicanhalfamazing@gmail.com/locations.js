@@ -11,7 +11,7 @@ const St = imports.gi.St;
 
 // Use __ () and N__() for the extension gettext domain, and reuse
 // the shell domain with the default _() and N_()
-const Gettext = imports.gettext.domain('dashtodock');
+const Gettext = imports.gettext.domain('dashtodockpop');
 const __ = Gettext.gettext;
 const N__ = function(e) { return e };
 
@@ -36,6 +36,8 @@ const NautilusFileOperations2Interface = '<node>\
 </node>';
 
 const NautilusFileOperations2ProxyInterface = Gio.DBusProxy.makeProxyWrapper(NautilusFileOperations2Interface);
+
+let locationId = 0;
 
 if (imports.system.version >= 17101) {
     Gio._promisify(Gio.File.prototype, 'query_info_async', 'query_info_finish');
@@ -312,6 +314,12 @@ var LocationAppInfo = GObject.registerClass({
             return null;
         }
     }
+      destroy() {
+        this.location = null;
+        this.icon = null;
+        this.name = null;
+        this.cancellable?.cancel();
+    }
 });
 
 const MountableVolumeAppInfo = GObject.registerClass({
@@ -374,6 +382,8 @@ class MountableVolumeAppInfo extends LocationAppInfo {
         this.disconnect(this._mountChanged);
         this.mount = null;
         this._signalsHandler.destroy();
+        
+        super.destroy();
     }
 
     vfunc_dup() {
@@ -609,6 +619,7 @@ class TrashAppInfo extends LocationAppInfo {
         this._monitor?.disconnect(this._monitorChangedId);
         this._monitor = null;
         this.location = null;
+        super.destroy();
     }
 
     list_actions() {
@@ -1031,12 +1042,12 @@ function wrapFileManagerApp() {
         fileManagerApp, 'windows-changed', () => {
             fileManagerApp.stop_emission_by_name('windows-changed');
             // Let's wait for the location app to take control before of us
-            const id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
-                fileManagerApp._sources.delete(id);
+                locationId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 50, () => {
+                fileManagerApp._sources.delete(locationId);
                 fileManagerApp._updateWindows();
                 return GLib.SOURCE_REMOVE;
             });
-            fileManagerApp._sources.add(id);
+            fileManagerApp._sources.add(locationId);
         });
 
     if (removables) {
@@ -1081,13 +1092,8 @@ function unWrapFileManagerApp() {
  * up-to-date as the trash fills and is emptied over time.
  */
 var Trash = class DashToDock_Trash {
-    constructor() {
-        this._cancellable = new Gio.Cancellable();
-    }
 
     destroy() {
-        this._cancellable.cancel();
-        this._cancellable = null;
         this._trashApp?.destroy();
     }
 
@@ -1096,7 +1102,7 @@ var Trash = class DashToDock_Trash {
             return;
 
         this._trashApp = makeLocationApp({
-            appInfo: new TrashAppInfo(this._cancellable),
+             appInfo: new TrashAppInfo(new Gio.Cancellable()),
             fallbackIconName: FALLBACK_TRASH_ICON,
         });
     }
@@ -1191,10 +1197,10 @@ var Removables = class DashToDock_Removables {
     _onVolumeAdded(volume) {
         Removables.initVolumePromises(volume);
 
-        if (!Docking.DockManager.settings.showMountsNetwork &&
-            volume.get_identifier('class') == 'network') {
-            return;
-        }
+        //if (!Docking.DockManager.settings.showMountsNetwork &&
+        //    volume.get_identifier('class') == 'network') {
+        //    return;
+        //}
 
         const mount = volume.get_mount();
         if (mount) {
@@ -1209,7 +1215,8 @@ var Removables = class DashToDock_Removables {
                 return;
         }
 
-        const appInfo = new MountableVolumeAppInfo(volume, this._cancellable);
+        const appInfo = new MountableVolumeAppInfo(volume,
+            new Utils.CancellableChild(this._cancellable));
         const volumeApp = makeLocationApp({
             appInfo,
             fallbackIconName: FALLBACK_REMOVABLE_MEDIA_ICON,
@@ -1279,3 +1286,4 @@ function getRunningApps() {
 function getStartingApps() {
     return getApps().filter(a => a.state === Shell.AppState.STARTING);
 }
+

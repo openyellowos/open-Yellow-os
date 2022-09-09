@@ -83,6 +83,7 @@ var DockDash = GObject.registerClass({
             false),
     },
     Signals: {
+        'menu-opened': {},
         'menu-closed': {},
         'icon-size-changed': {},
     }
@@ -104,6 +105,7 @@ var DockDash = GObject.registerClass({
         this._isHorizontal = ((this._position == St.Side.TOP) ||
                                (this._position == St.Side.BOTTOM));
 
+        this._alignment = Utils.getAlignment();
         this._dragPlaceholder = null;
         this._dragPlaceholderPos = -1;
         this._animatingPlaceholdersCount = 0;
@@ -119,8 +121,8 @@ var DockDash = GObject.registerClass({
 
         this._dashContainer = new St.BoxLayout({
             name: "dashtodockDashContainer",
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
+          x_align: this._alignment,
+            y_align: this._alignment,
             vertical: !this._isHorizontal,
             y_expand: this._isHorizontal,
             x_expand: !this._isHorizontal,
@@ -137,9 +139,9 @@ var DockDash = GObject.registerClass({
 
         if (Docking.DockManager.settings.dockExtended) {
             if (!this._isHorizontal) {
-                this._scrollView.y_align = Clutter.ActorAlign.START;
+                this._scrollView.y_align = this._alignment;
             } else {
-                this._scrollView.x_align = Clutter.ActorAlign.START;
+                this._scrollView.x_align = this._alignment;
             }
         }
 
@@ -151,7 +153,7 @@ var DockDash = GObject.registerClass({
             clip_to_allocation: false,
             ...(!this._isHorizontal ? { layout_manager: new DockDashIconsVerticalLayout() } : {}),
             x_align: rtl ? Clutter.ActorAlign.END : Clutter.ActorAlign.START,
-            y_align: this._isHorizontal ? Clutter.ActorAlign.CENTER: Clutter.ActorAlign.START,
+            y_align: this._isHorizontal ? this._alignment : Clutter.ActorAlign.START,
             y_expand: !this._isHorizontal,
             x_expand: this._isHorizontal
         });
@@ -275,10 +277,21 @@ var DockDash = GObject.registerClass({
     _onDestroy() {
         this.iconAnimator.destroy();
 
-        if (this._requiresVisibilityTimeout)
+        if (this._requiresVisibilityTimeout) {
             GLib.source_remove(this._requiresVisibilityTimeout);
+            delete this._requiresVisibilityTimeout;
+        }
+            
+        if(this._showLabelTimeoutId){
+            GLib.Source.remove(this._showLabelTimeoutId);
+            this._showLabelTimeoutId = null;
+        }
+        
+        if (this._ensureActorVisibilityTimeoutId) {
+            GLib.source_remove(this._ensureActorVisibilityTimeoutId);
+            this._ensureActorVisibilityTimeoutId = null;
+        }
     }
-
 
     _onItemDragBegin() {
         return Dash.Dash.prototype._onItemDragBegin.call(this, ...arguments);
@@ -579,7 +592,9 @@ var DockDash = GObject.registerClass({
     _itemMenuStateChanged(item, opened) {
         Dash.Dash.prototype._itemMenuStateChanged.call(this, item, opened);
 
-        if (!opened) {
+        if (opened) {
+            this.emit('menu-opened');
+        } else {
             // I want to listen from outside when a menu is closed. I used to
             // add a custom signal to the appIcon, since gnome 3.8 the signal
             // calling this callback was added upstream.
@@ -722,6 +737,14 @@ var DockDash = GObject.registerClass({
         let running = this._appSystem.get_running();
         const dockManager = Docking.DockManager.getDefault();
         const { settings } = dockManager;
+        
+        if (Docking.DockManager.settings.dockExtended) {
+            if (!this._isHorizontal) {
+                this._scrollView.y_align = this._alignment;
+            } else {
+                this._scrollView.x_align = this._alignment;
+            }
+        }
 
         if (settings.isolateWorkspaces ||
             settings.isolateMonitors) {
@@ -899,7 +922,7 @@ var DockDash = GObject.registerClass({
                     x_align: this._isHorizontal ?
                         Clutter.ActorAlign.FILL : Clutter.ActorAlign.CENTER,
                     y_align: this._isHorizontal ?
-                        Clutter.ActorAlign.CENTER : Clutter.ActorAlign.FILL,
+                       Clutter.ActorAlign.CENTER : Clutter.ActorAlign.FILL,
                     width: this._isHorizontal ? -1 : this.iconSize,
                     height: this._isHorizontal ? this.iconSize : -1,
                     reactive: true,
@@ -1104,3 +1127,4 @@ function ensureActorVisibleInScrollView(scrollView, actor) {
 
     return [hValue - hValue0, vValue - vValue0];
 }
+

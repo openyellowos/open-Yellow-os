@@ -1,9 +1,10 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 const Main = imports.ui.main;
-
+const GLib = imports.gi.GLib;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Docking = Me.imports.docking;
+const Locations = Me.imports.locations;
 const ExtensionSystem = imports.ui.extensionSystem;
 
 // We declare this with var so it can be accessed by other extensions in
@@ -14,7 +15,7 @@ var dockManager;
 let _extensionlistenerId;
 
 function init() {
-    ExtensionUtils.initTranslations('dashtodock');
+    ExtensionUtils.initTranslations('dashtodockpop');
 }
 
 function enable() {
@@ -28,18 +29,19 @@ function enable() {
 }
 
 function disable() {
-    try {
+
         if (dockManager != null) {
             dockManager.destroy();
+
+            if (_extensionlistenerId) {
+                Main.extensionManager.disconnect(_extensionlistenerId);
+                _extensionlistenerId = null;
+            }
+
         }
-    } catch(e) {
-        log('Failed to destroy dockManager: %s'.format(e.message));
-    } finally {
-        if (_extensionlistenerId) {
-            Main.extensionManager.disconnect(_extensionlistenerId);
-            _extensionlistenerId = 0;
-        }
-    }
+
+        dockManager = null;
+
 }
 
 function conditionallyenabledock() {

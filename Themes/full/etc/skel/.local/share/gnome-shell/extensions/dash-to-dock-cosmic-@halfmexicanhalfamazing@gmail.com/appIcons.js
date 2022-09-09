@@ -16,6 +16,7 @@ const Gettext = imports.gettext.domain('dashtodock');
 const __ = Gettext.gettext;
 const N__ = function(e) { return e };
 
+const Config = imports.misc.config;
 const AppDisplay = imports.ui.appDisplay;
 const AppFavorites = imports.ui.appFavorites;
 const BoxPointer = imports.ui.boxpointer;
@@ -647,6 +648,8 @@ var DockAbstractAppIcon = GObject.registerClass({
 
         }
 
+        this.emit('menu-state-changed', !this._previewMenu.isOpen);
+
         if (this._previewMenu.isOpen)
             this._previewMenu.close();
         else
@@ -966,9 +969,10 @@ const DockAppIconMenu = class DockAppIconMenu extends PopupMenu.PopupMenu {
         if (Docking.DockManager.settings.showWindowsPreview) {
             // Display the app windows menu items and the separator between windows
             // of the current desktop and other windows.
-
+            const windows = this._source.getInterestingWindows();
             this._allWindowsMenuItem = new PopupMenu.PopupSubMenuMenuItem(__('All Windows'), false);
-            this._allWindowsMenuItem.hide();
+            if (windows.length > 0)
+                this.addMenuItem(this._allWindowsMenuItem);
             this.addMenuItem(this._allWindowsMenuItem);
         } else {
             const windows = this._source.getInterestingWindows();
@@ -1041,15 +1045,19 @@ const DockAppIconMenu = class DockAppIconMenu extends PopupMenu.PopupMenu {
                 this._appendSeparator();
 
                 let isFavorite = AppFavorites.getAppFavorites().isFavorite(this._source.app.get_id());
-
+                const [majorVersion] = Config.PACKAGE_VERSION.split('.');
                 if (isFavorite) {
-                    let item = this._appendMenuItem(_('Remove from Favorites'));
+                    const label = majorVersion >= 42 ? _('Unpin') :
+                        _('Remove from Favorites');
+                    let item = this._appendMenuItem(label);
                     item.connect('activate', () => {
                         let favs = AppFavorites.getAppFavorites();
                         favs.removeFavorite(this._source.app.get_id());
                     });
                 } else {
-                    let item = this._appendMenuItem(_('Add to Favorites'));
+                     const label = majorVersion >= 42 ? _('Pin to Dash') :
+                        _('Add to Favorites');
+                    let item = this._appendMenuItem(label);
                     item.connect('activate', () => {
                         let favs = AppFavorites.getAppFavorites();
                         favs.addFavorite(this._source.app.get_id());
@@ -1145,6 +1153,9 @@ const DockAppIconMenu = class DockAppIconMenu extends PopupMenu.PopupMenu {
           if (windows.length > 0){
               this._allWindowsMenuItem.show();
               this._allWindowsMenuItem.setSensitive(true);
+              
+              if (Docking.DockManager.settings.defaultWindowsPreviewToOpen)
+                  this._allWindowsMenuItem.menu.open();
           }
       }
 
@@ -1411,3 +1422,4 @@ function itemShowLabel()  {
         mode: Clutter.AnimationMode.EASE_OUT_QUAD
     });
 }
+
