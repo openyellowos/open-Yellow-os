@@ -90,9 +90,10 @@ gnome-logs
 gnome-menus
 #gnome-multi-writer
 gnome-online-accounts
-gnome-online-miners
+#gnome-online-miners
 gnome-photos
 gnome-session
+gnome-session-canberra 
 gnome-settings-daemon
 gnome-shell
 gnome-shell-extensions
@@ -135,7 +136,7 @@ libcanberra-pulse
 libglib2.0-bin
 libnss-mdns
 libnss-mymachines
-libnss-resolve 
+#libnss-resolve 
 libnss-systemd
 libpam-gnome-keyring
 libproxy1-plugin-gsettings
@@ -146,6 +147,7 @@ librsvg2-common
 libspa-0.2-bluetooth
 linux-image-amd64
 locales-all
+mintstick
 mlocate
 mozc-utils-gui
 nano
@@ -176,6 +178,7 @@ syslinux-common
 system-config-printer-common
 system-config-printer-udev
 systemd
+#systemd-resolved
 systemd-timesyncd
 task-laptop
 task-japanese
