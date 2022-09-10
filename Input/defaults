@@ -34,7 +34,7 @@ LIVE_USER="demo"
 LOCALE="ja_JP.UTF-8"
 MIRROR="jp"
 NEW_HOSTNAME="oYo"
-RELEASE_DATE="September 08, 2022"
+RELEASE_DATE="September 10, 2022"
 TIME_ZONE="Asia/Tokyo"
 
 #DE particular items
