@@ -154,4 +154,13 @@
     <pcolor>#ffffff</pcolor>
     <scolor>#000000</scolor>
   </wallpaper>
+  <wallpaper deleted="false">
+    <name>openyellowos Background18</name>
+    <name xml:lang="ja">openyellowos18</name>
+    <filename>/usr/share/backgrounds/gnome/openYellowos-wallpaper18.png</filename>
+    <options>scaled</options>
+    <shade_type>solid</shade_type>
+    <pcolor>#ffffff</pcolor>
+    <scolor>#000000</scolor>
+  </wallpaper>
 </wallpapers>
