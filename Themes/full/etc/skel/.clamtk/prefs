@@ -8,6 +8,6 @@ GUICheck=1
 SizeLimit=0
 Mounted=0
 Whitelist=
-Update=single
+Update=shared
 TruncateLog=1
 Recursive=1
