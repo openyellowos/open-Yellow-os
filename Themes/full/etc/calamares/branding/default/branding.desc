@@ -22,7 +22,8 @@ images:
     productWelcome:      "welcome.png"
     # productWallpaper:  "wallpaper.png"
 
-slideshow:               "show.qml"
+#slideshow:               "show.qml"
+slideshow: ["slide1.png","slide2.png","slide3.png","slide4.png"]
 
 style:
    sidebarBackground:    "#2c3133"
