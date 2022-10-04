@@ -3,7 +3,7 @@ componentName:   default
 welcomeStyleCalamares: true
 welcomeExpandingLogo: true
 windowExpanding: normal
-windowSize: 800px,520px
+windowSize: 700px,550px
 windowPlacement: center
 
 strings:
