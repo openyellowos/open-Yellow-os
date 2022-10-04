@@ -10,7 +10,7 @@ bluetooth
 bluez-firmware
 btrfs-progs
 calamares
-calamares-settings-debian
+#calamares-settings-debian
 #cheese
 chrome-gnome-shell
 clamtk
@@ -162,6 +162,7 @@ pciutils
 plymouth
 plymouth-themes
 poppler-data
+#printer-driver-cups-pdf
 pulseaudio
 pulseaudio-module-bluetooth
 resolvconf
