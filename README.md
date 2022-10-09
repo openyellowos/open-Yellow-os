@@ -18,16 +18,19 @@ open.Yellow.osでビルドすることを想定しています。
 # ビルド
 ## oYoのGitからbuild-iso-mxのソースを取得する
 任意のディレクトリで以下のコマンドを実行し、Gitからbuild-iso-mxのソースを取得します。
+
 `git clone https://scm.osdn.net/gitroot/open-yellow-os/open-yellow-os.git`
 
 
 ## build-iso-linuxディレクトリへ移動する
 ターミナルを起動しbuild-iso-mxディレクトリに移動します。
+
 `cd build-iso-mx`
 
 
-### 以下のコマンドで、ビルドを開始する
+## 以下のコマンドで、ビルドを開始する
 ターミナルで以下のコマンドを実行し、ビルドを開始します。
+
 `sudo ./build-iso -0`
 
 ※[-0]は、一番最初から処理を実行するためのオプションです。
