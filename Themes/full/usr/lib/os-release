@@ -1,7 +1,7 @@
-PRETTY_NAME="open.Yellow.os 22.10-beta2 (dandelion)"
+PRETTY_NAME="open.Yellow.os 22.10-beta2.1 (dandelion)"
 NAME="open.Yellow.os"
-VERSION_ID="22.10-beta2"
-VERSION="22.10-beta2 (dandelion)"
+VERSION_ID="22.10-beta2.1"
+VERSION="22.10-beta2.1 (dandelion)"
 VERSION_CODENAME=testing
 ID=debian
 ID_LIKE=debian
