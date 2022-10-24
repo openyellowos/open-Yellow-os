@@ -23,7 +23,7 @@ images:
     # productWallpaper:  "wallpaper.png"
 
 #slideshow:               "show.qml"
-slideshow: ["slide1.png","slide2.png","slide3.png","slide4.png"]
+slideshow: ["slide1.png","slide2.png","slide3.png","slide4.png","slide5.png"]
 
 style:
    sidebarBackground:    "#2c3133"
