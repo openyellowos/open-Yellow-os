@@ -1288,7 +1288,7 @@ do_stage_4() {
      #コマンド実行
      #----------------------------
      #アプリが応答なしになるまでの時間を長くする
-    gsettings set org.gnome.mutter check-alive-timeout 10000
+    #gsettings set org.gnome.mutter check-alive-timeout 10000
      #設定⇒色をクリックすると、設定アプリが落ちる不具合の対策
     sudo apt install -y printer-driver-cups-pdf
     sudo service cups start
