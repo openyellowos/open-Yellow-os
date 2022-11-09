@@ -1,4 +1,4 @@
-# build-iso-mx
+# open.Yellow.osのbuild tool
 open.Yellow.osは、 MX LinuxのGitHubで公開されている「build-iso-mx」をカスタマイズしたビルドツールを使用しております。
 
 
@@ -25,7 +25,7 @@ open.Yellow.osでビルドすることを想定しています。
 ## build-iso-linuxディレクトリへ移動する
 ターミナルを起動しbuild-iso-mxディレクトリに移動します。
 
-`cd build-iso-mx`
+`cd open-yellow-os`
 
 
 ## 以下のコマンドで、ビルドを開始する
