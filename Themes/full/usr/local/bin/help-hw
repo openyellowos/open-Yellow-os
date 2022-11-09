@@ -1,37 +1,89 @@
 #!/bin/bash
+
 clear
-echo " _   ___        __    _          _"
-echo "| | | \ \      / /   | |__   ___| |_ __   ___ _ __"
-echo "| |_| |\ \ /\ / /____| '_ \ / _ \ | '_ \ / _ \ '__|"
-echo "|  _  | \ V  V /_____| | | |  __/ | |_) |  __/ |"
-echo "|_| |_|  \_/\_/      |_| |_|\___|_| .__/ \___|_|"
-echo "                                  |_|"
-echo -e "\n形式は以下の通りです"
-echo  "  1. journalctl -k"
-echo  "  2. lspci"
-echo  "  3. lsusb"
-echo  ""
-while /bin/true; do
-  echo -n "番号を入力して下さい: "
-  read -r check_type
-  if [[ $check_type =~ ^[1-3] ]];then
-    break
-  elif [[ $check_type == "" ]];then
-    break
+
+function Help_OUT() {
+  declare -A Help_MSG=(["journalctl -k --no-pager"]="dmesg" ["lspci"]="lspci" ["lsusb"]="lsusb")
+  Help_LOG="Help-HW_${Help_MSG[$Help_RUN]}_$(date +%F-%H-%M-%S).log"
+  echo -e "\"${Help_MSG[$Help_RUN]}\" を出力します\n"
+  $Help_RUN|tee -a $Help_LOG 2>/dev/null
+  if [ $? == 0 ]; then
+    echo -e "\n\nCPU Info\n\n$(lscpu)">>$Help_LOG
+    echo -e "\n\nRAM Info\n$(free -h)">>$Help_LOG
+    echo -e "\n\nStorage Info\n\n$(df -h)">>$Help_LOG
+    echo -e "\nログは \"$Help_LOG\" としてファイルに保存されました｡\n"
+    exit 0
+  else
+    echo -e "\n書込権限不足等の理由でファイルを書き込めませんでした｡\n"
     exit 1
   fi
-done
-clear
-if [[ $check_type == 1 ]];then
-  echo -e "\"journalctl -k\"を実行します\n終了する場合は\"Q\"キーを押してください\n"
-  sleep 1
-  journalctl -k
-elif [[ $check_type == 2 ]];then
-  echo -e "\"lspci\"を実行します\n"
-  lspci
-elif [[ $check_type == 3 ]];then
-  echo -e "\"lsusb\"を実行します\n"
-  lsusb
-else
-  echo -n ""
-fi
+}
+
+function Help_GUI() {
+  if [ ! $(command -v whiptail) ]; then
+    if [ $(id -u) != 0 ]; then SUDO="sudo "; fi
+    echo -e "\n\n必須ソフトウェアが削除されているため､\n\"help-hw\" の実行に失敗しました｡\n\n"
+    echo -e "解決するには？\n"
+    echo -e "${SUDO}apt install -y whiptail\n\n上記のコマンドをインターネットに接続されている環境で実行します\n"
+    exit 1
+  fi
+  Help_RUN=$(whiptail --title "HW-Helper" --menu "\n選択してください" 0 0 0 --ok-button "選択" --cancel-button "終了" --notags 'journalctl -k --no-pager' "dmesg" 'lspci' "lspci" 'lsusb' "lsusb" 3>&1 1>&2 2>&3)
+  if [ $? == 134 ]; then $(basename $0) --missing-popt; exit 0; fi
+  whiptail --title "HW-Helper" --yesno "\nファイルに出力しますか？" 0 0 --yes-button "する" --no-button "しない" --defaultno 3>&1 1>&2 2>&3
+  if [ $? == 0 ]; then
+    Help_OUT
+  else
+    echo -e "\"${Help_MSG[$Help_RUN]}\" を出力します\n"
+    $Help_RUN
+    echo
+  fi
+}
+
+function Help_CUI() {
+  echo " _   ___        __    _          _"
+  echo "| | | \ \      / /   | |__   ___| |_ __   ___ _ __"
+  echo "| |_| |\ \ /\ / /____| '_ \ / _ \ | '_ \ / _ \ '__|"
+  echo "|  _  | \ V  V /_____| | | |  __/ | |_) |  __/ |"
+  echo "|_| |_|  \_/\_/      |_| |_|\___|_| .__/ \___|_|"
+  echo "                                  |_|"
+  echo -e "\n形式は以下の通りです\n"
+  echo  "  1. dmesg"
+  echo  "  2. lspci"
+  echo  "  3. lsusb"
+  echo
+  echo -n "番号を半角数字で入力して下さい: "
+  read -n 1 -r Help_NUM
+  if [[ ! $Help_NUM =~ ^[1-3]+$ ]]; then clear; exit 1; fi
+  declare -A Help_SET=([1]="journalctl -k --no-pager" [2]="lspci" [3]="lsusb")
+  Help_RUN=${Help_SET[$Help_NUM]}
+  echo -n -e "\n\nファイルに出力しますか？[y/N]："
+  read -n 1 -r Help_YES
+  clear
+  case $Help_YES in
+    [Yy])
+      Help_OUT
+      ;;
+    *)
+      echo -e "\"${Help_MSG[$Help_RUN]}\" を出力します\n"
+      $Help_RUN
+      echo
+      ;;
+    esac
+}
+
+declare -A Help_MSG=(["journalctl -k --no-pager"]="dmesg" ["lspci"]="lspci" ["lsusb"]="lsusb")
+
+case $1 in
+  -c)
+    Help_CUI
+    ;;
+  --missing-popt)
+    echo -e "※ エラーが発生したため､ もう一度選択してください"
+    Help_CUI
+    ;;
+  *)
+    Help_GUI
+    ;;
+esac
+
+exit 0
