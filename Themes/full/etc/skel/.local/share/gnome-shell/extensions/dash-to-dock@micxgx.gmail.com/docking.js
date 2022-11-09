@@ -61,6 +61,7 @@ const Labels = Object.freeze({
     MAIN_DASH: Symbol('main-dash'),
     OLD_DASH_CHANGES: Symbol('old-dash-changes'),
     SETTINGS: Symbol('settings'),
+    STARTUP_ANIMATION: Symbol('startup-animation'),
     WORKSPACE_SWITCH_SCROLL: Symbol('workspace-switch-scroll'),
 });
 
@@ -730,7 +731,7 @@ var DockedDash = GObject.registerClass({
     _onMenuClosed() {
         this._ignoreHover = false;
         this._box.sync_hover();
-        this._hoverChanged();
+        this._updateDashVisibility();
     }
 
     _hoverChanged() {
@@ -738,7 +739,7 @@ var DockedDash = GObject.registerClass({
             // Skip if dock is not in autohide mode for instance because it is shown
             // by intellihide.
             if (this._autohideIsEnabled) {
-                if (this._box.hover)
+                if (this._box.hover || Main.overview.visible)
                     this._show();
                 else
                     this._hide();
@@ -1383,6 +1384,13 @@ var KeyboardShortcuts = class DashToDock_KeyboardShortcuts {
     }
 
     destroy() {
+        DockManager.allDocks.forEach(dock => {
+            if (dock._numberOverlayTimeoutId) {
+                GLib.source_remove(dock._numberOverlayTimeoutId);
+                dock._numberOverlayTimeoutId = 0;
+            }
+        });
+
         // Remove keybindings
         this._disableHotKeys();
         this._disableExtraShortcut();
@@ -1567,14 +1575,12 @@ var WorkspaceIsolation = class DashToDock_WorkspaceIsolation {
         // here this is the Shell.App
         function IsolatedOverview() {
             // These lines take care of Nautilus for icons on Desktop
-            let windows = this.get_windows().filter(function(w) {
-                return w.get_workspace().index() == global.workspace_manager.get_active_workspace_index();
-            });
-            if (windows.length == 1)
-                if (windows[0].skip_taskbar)
-                    return this.open_new_window(-1);
+            const activeWorkspaceIndex =
+                global.workspaceManager.get_active_workspace_index();
+            const windows = this.get_windows().filter(w =>
+                !w.skipTaskbar && w.get_workspace().index() === activeWorkspaceIndex);
 
-            if (this.is_on_workspace(global.workspace_manager.get_active_workspace()))
+            if (windows.length)
                 return Main.activateWindow(windows[0]);
             return this.open_new_window(-1);
         }
@@ -1976,7 +1982,7 @@ var DockManager = class DashToDock_DockManager {
         this.emit('docks-ready');
     }
 
-    _prepareStartupAnimation() {
+    _prepareStartupAnimation(callback) {
         DockManager.allDocks.forEach(dock => {
             const { dash } = dock;
 
@@ -1987,6 +1993,31 @@ var DockManager = class DashToDock_DockManager {
                 translation_y: 0,
             });
         });
+
+        // We need to ensure that if docks are destroyed before animation is
+        // completed, then we still ensure the animation runs anyways.
+        const label = Labels.STARTUP_ANIMATION;
+        this._signalsHandler.removeWithLabel(label);
+
+        // This shouldn't really ever happen, but in theory the manager
+        // could be destroyed at any time, in such case complete the animation
+        this._signalsHandler.addWithLabel(label, this, 'destroy', () =>
+            Main.overview.runStartupAnimation(callback));
+
+        const waitForDocksReady = () => {
+            global.window_group.remove_clip();
+            this._signalsHandler.addWithLabel(label, this, 'docks-ready', () => {
+                this._signalsHandler.removeWithLabel(label);
+                Main.overview.runStartupAnimation(callback);
+            });
+        };
+
+        if (this._allDocks.length) {
+            this._signalsHandler.addWithLabel(label, this, 'docks-destroyed',
+                () => waitForDocksReady());
+        } else {
+            waitForDocksReady();
+        }
     }
 
     _runStartupAnimation(callback) {
@@ -2011,8 +2042,13 @@ var DockManager = class DashToDock_DockManager {
             }
 
             const mainDockProperties = {};
-            if (dock === this.mainDock)
-                mainDockProperties.onComplete = callback;
+            if (dock === this.mainDock) {
+                mainDockProperties.onComplete = () => {
+                    this._signalsHandler.removeWithLabel(Labels.STARTUP_ANIMATION);
+                    if (callback)
+                        callback();
+                };
+            }
 
             dash.ease({
                 opacity: 255,
@@ -2085,32 +2121,28 @@ var DockManager = class DashToDock_DockManager {
 
         this._methodInjections.addWithLabel(Labels.MAIN_DASH, ControlsManager.prototype,
             'runStartupAnimation', async function (originalMethod, callback) {
-                const injections = new Utils.InjectionsHandler();
-                const dockManager = DockManager.getDefault();
-                DockManager.allDocks.forEach(dock => (dock.opacity = 0));
-                injections.add(dockManager.mainDock.dash, 'ease', () => {});
-                let callbackArgs = [];
-                const ret = await originalMethod.call(this,
-                    (...args) => (callbackArgs = [...args]));
-                injections.destroy();
+                try {
+                    const injections = new Utils.InjectionsHandler();
+                    const dockManager = DockManager.getDefault();
+                    dockManager._prepareStartupAnimation(callback);
+                    injections.add(dockManager.mainDock.dash, 'ease', () => {});
+                    let callbackArgs = [];
+                    const ret = await originalMethod.call(this,
+                        (...args) => (callbackArgs = [...args]));
+                    injections.destroy();
 
-                if (!DockManager.allDocks.length) {
-                    // Docks may have been destroyed, let's wait till we've one again
-                    const readyPromise = new Promise(resolve => {
-                        const id = dockManager.connect('docks-ready', () => {
-                            dockManager.disconnect(id);
-                            resolve();
-                        });
-                    })
-                    await readyPromise;
+                    const onComplete = () => callback(...callbackArgs);
+                    dockManager._prepareStartupAnimation(onComplete);
+                    dockManager._runStartupAnimation(onComplete);
+                    return ret;
+                } catch (e) {
+                    logError(e);
                 }
-
-                dockManager._prepareStartupAnimation();
-                dockManager._runStartupAnimation(() => callback(...callbackArgs));
-                return ret;
             });
 
         const maybeAdjustBoxToDock = (state, box, spacing) => {
+            const initialRatio = box.get_width() / box.get_height();
+
             if (state === OverviewControls.ControlsState.WINDOW_PICKER) {
                 const searchBox = this.overviewControls._searchEntry.get_allocation_box();
                 const { shouldShow: wsThumbnails } = this.overviewControls._thumbnailsBox;
@@ -2122,17 +2154,26 @@ var DockManager = class DashToDock_DockManager {
 
                 if (!wsThumbnails && this.mainDock.position === St.Side.BOTTOM)
                     box.y2 -= spacing;
-            } else if (state === OverviewControls.ControlsState.APP_GRID) {
-                return box;
             }
 
             if (this.mainDock.isHorizontal || this.settings.dockFixed)
                 return box;
 
-            const [, preferredWidth] = this.mainDock.get_preferred_width(box.get_height());
+            let [, preferredWidth] = this.mainDock.get_preferred_width(box.get_height());
+
+            // For some reason we need to use an even value for the box area
+            // or we may end up in allocation issues:
+            // https://github.com/micheleg/dash-to-dock/issues/1612
+            preferredWidth = Math.floor(preferredWidth / 2.0) * 2
+
             box.x2 -= preferredWidth;
             if (this.mainDock.position === St.Side.LEFT)
                 box.set_origin(box.x1 + preferredWidth, box.y1);
+
+            // Reduce the box height too, to keep the initial proportions
+            const heightAdjustment = (preferredWidth / initialRatio) / 2;
+            box.y1 += heightAdjustment;
+            box.y2 -= heightAdjustment;
 
             return box;
         }
@@ -2282,7 +2323,7 @@ var DockManager = class DashToDock_DockManager {
                     const y = monitor.y + monitor.height / 2.0;
                     const { STARTUP_ANIMATION_TIME } = Layout;
 
-                    this._prepareStartupAnimation();
+                    this._prepareStartupAnimation(callback);
                     Main.uiGroup.set_pivot_point(
                         x / global.screen_width,
                         y / global.screen_height);
@@ -2298,11 +2339,10 @@ var DockManager = class DashToDock_DockManager {
                         opacity: 255,
                         duration: STARTUP_ANIMATION_TIME,
                         mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-                        onComplete: () => {
-                            callback();
-                            this._runStartupAnimation();
-                        },
+                        onComplete: callback,
                     });
+
+                    this._runStartupAnimation();
                 });
         }
     }
@@ -2319,6 +2359,8 @@ var DockManager = class DashToDock_DockManager {
         // Delete all docks
         this._allDocks.forEach(d => d.destroy());
         this._allDocks = [];
+
+        this.emit('docks-destroyed');
     }
 
     _restoreDash() {
