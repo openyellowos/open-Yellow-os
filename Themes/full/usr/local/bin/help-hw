@@ -28,7 +28,8 @@ function Help_GUI() {
     exit 1
   fi
   Help_RUN=$(whiptail --title "HW-Helper" --menu "\n選択してください" 0 0 0 --ok-button "選択" --cancel-button "終了" --notags 'journalctl -k --no-pager' "dmesg" 'lspci' "lspci" 'lsusb' "lsusb" 3>&1 1>&2 2>&3)
-  if [ $? == 134 ]; then $(basename $0) --missing-popt; exit 0; fi
+  Help_END=$?
+  if [ $Help_END == 1 ]; then clear; exit 0; elif [ $Help_END == 134 ]; then $(basename $0) --missing-popt; exit 0; else :; fi
   whiptail --title "HW-Helper" --yesno "\nファイルに出力しますか？" 0 0 --yes-button "する" --no-button "しない" --defaultno 3>&1 1>&2 2>&3
   if [ $? == 0 ]; then
     Help_OUT
