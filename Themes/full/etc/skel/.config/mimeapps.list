@@ -1,0 +1,5 @@
+[Default Applications]
+application/vnd.debian.binary-package=gdebi.desktop
+
+[Added Associations]
+application/vnd.debian.binary-package=gdebi.desktop;

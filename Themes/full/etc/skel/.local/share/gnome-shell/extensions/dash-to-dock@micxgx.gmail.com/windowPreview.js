@@ -7,11 +7,9 @@
 const Clutter = imports.gi.Clutter;
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
-const Meta = imports.gi.Meta;
 const St = imports.gi.St;
 const Main = imports.ui.main;
 
-const BoxPointer = imports.ui.boxpointer;
 const Params = imports.misc.params;
 const PopupMenu = imports.ui.popupMenu;
 const Workspace = imports.ui.workspace;
@@ -23,12 +21,12 @@ const PREVIEW_MAX_WIDTH = 250;
 const PREVIEW_MAX_HEIGHT = 150;
 
 const PREVIEW_ANIMATION_DURATION = 250;
-const MAX_PREVIEW_GENERATION_ATTEMPTS = 15;
 
 var WindowPreviewMenu = class DashToDock_WindowPreviewMenu extends PopupMenu.PopupMenu {
 
     constructor(source) {
-        super(source, 0.5, Utils.getPosition());
+        let side = Utils.getPosition();
+        super(source, 0.5, side);
 
         // We want to keep the item hovered while the menu is up
         this.blockSourceEvents = true;
@@ -37,7 +35,7 @@ var WindowPreviewMenu = class DashToDock_WindowPreviewMenu extends PopupMenu.Pop
         this._app = this._source.app;
         let monitorIndex = this._source.monitorIndex;
 
-        this.actor.add_style_class_name('app-menu');
+        this.actor.add_style_class_name('app-well-menu');
         this.actor.set_style('max-width: '  + (Main.layoutManager.monitors[monitorIndex].width  - 22) + 'px; ' +
                              'max-height: ' + (Main.layoutManager.monitors[monitorIndex].height - 22) + 'px;');
         this.actor.hide();
@@ -50,6 +48,11 @@ var WindowPreviewMenu = class DashToDock_WindowPreviewMenu extends PopupMenu.Pop
         this._destroyId = this._source.connect('destroy', this.destroy.bind(this));
 
         Main.uiGroup.add_actor(this.actor);
+
+        // Change the initialized side where required.
+        this._arrowSide = side;
+        this._boxPointer._arrowSide = side;
+        this._boxPointer._userArrowSide = side;
 
         this.connect('destroy', this._onDestroy.bind(this));
     }
@@ -66,7 +69,7 @@ var WindowPreviewMenu = class DashToDock_WindowPreviewMenu extends PopupMenu.Pop
         let windows = this._source.getInterestingWindows();
         if (windows.length > 0) {
             this._redisplay();
-            this.open(BoxPointer.PopupAnimation.FULL);
+            this.open();
             this.actor.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
             this._source.emit('sync-tooltip');
         }
@@ -150,12 +153,12 @@ var WindowPreviewList = class DashToDock_WindowPreviewList extends PopupMenu.Pop
         case Clutter.ScrollDirection.DOWN:
             delta = +increment;
             break;
-        case Clutter.ScrollDirection.SMOOTH: {
+        case Clutter.ScrollDirection.SMOOTH:
             let [dx, dy] = event.get_scroll_delta();
             delta = dy*increment;
             delta += dx*increment;
             break;
-            }
+
         }
 
         adjustment.set_value(adjustment.get_value() + delta);
@@ -310,7 +313,7 @@ var WindowPreviewList = class DashToDock_WindowPreviewList extends PopupMenu.Pop
 };
 
 var WindowPreviewMenuItem = GObject.registerClass(
-class WindowPreviewMenuItem extends PopupMenu.PopupBaseMenuItem {
+class DashToDock_WindowPreviewMenuItem extends PopupMenu.PopupBaseMenuItem {
     _init(window, params) {
         super._init(params);
 
@@ -322,10 +325,8 @@ class WindowPreviewMenuItem extends PopupMenu.PopupBaseMenuItem {
         this.remove_child(this._ornamentLabel);
         this.add_style_class_name('dashtodock-app-well-preview-menu-item');
 
-        // Now we don't have to set PREVIEW_MAX_WIDTH and PREVIEW_MAX_HEIGHT as preview size - that made all kinds of windows either stretched or squished (aspect ratio problem)
         this._cloneBin = new St.Bin();
-
-        this._updateWindowPreviewSize();
+        this._cloneBin.set_size(PREVIEW_MAX_WIDTH, PREVIEW_MAX_HEIGHT);
 
         // TODO: improve the way the closebutton is layout. Just use some padding
         // for the moment.
@@ -342,7 +343,7 @@ class WindowPreviewMenuItem extends PopupMenu.PopupBaseMenuItem {
         this.closeButton.opacity = 0;
         this.closeButton.connect('clicked', this._closeWindow.bind(this));
 
-        let overlayGroup = new Clutter.Actor({layout_manager: new Clutter.BinLayout(), y_expand: true });
+        let overlayGroup = new Clutter.Actor({layout_manager: new Clutter.BinLayout() });
 
         overlayGroup.add_actor(this._cloneBin);
         overlayGroup.add_actor(this.closeButton);
@@ -369,68 +370,32 @@ class WindowPreviewMenuItem extends PopupMenu.PopupBaseMenuItem {
         this.connect('destroy', this._onDestroy.bind(this));
     }
 
-    _getWindowPreviewSize() {
-        const emptySize = [0, 0, 0];
-
-        let mutterWindow = this._window.get_compositor_private();
-        if (!mutterWindow?.get_texture())
-            return emptySize;
-
-        const [width, height] = mutterWindow.get_size();
-        if (!width || !height)
-            return emptySize;
-
-        let scale;
-
-        if (Utils.getPreviewScale()) {
-            scale = Utils.getPreviewScale();
-        } else {
-            // a simple example with 1680x1050:
-            // * 250/1680 = 0,1488
-            // * 150/1050 = 0,1429
-            // => scale is 0,1429
-            scale = Math.min(1.0, PREVIEW_MAX_WIDTH/width, PREVIEW_MAX_HEIGHT/height)
-        }
-
-        scale *= St.ThemeContext.get_for_stage(global.stage).scaleFactor;
-
-        // width and height that we wanna multiply by scale
-        return [width, height, scale];
-    }
-
-    _updateWindowPreviewSize() {
-        // This gets the actual windows size for the preview
-        [this._width, this._height, this._scale] = this._getWindowPreviewSize();
-        this._cloneBin.set_size(this._width * this._scale, this._height * this._scale);
-    }
-
     _cloneTexture(metaWin){
+
+        let mutterWindow = metaWin.get_compositor_private();
+
         // Newly-created windows are added to a workspace before
         // the compositor finds out about them...
-        if (!this._width || !this._height) {
-            this._cloneTextureLater = Meta.later_add(Meta.LaterType.BEFORE_REDRAW, () => {
+        // Moreover sometimes they return an empty texture, thus as a workarounf also check for it size
+        if (!mutterWindow || !mutterWindow.get_texture() || !mutterWindow.get_size()[0]) {
+            this._cloneTextureId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                 // Check if there's still a point in getting the texture,
                 // otherwise this could go on indefinitely
-                this._updateWindowPreviewSize();
-
-                if (this._width && this._height) {
+                if (metaWin.get_workspace())
                     this._cloneTexture(metaWin);
-                } else {
-                    this._cloneAttempt = (this._cloneAttempt || 0) + 1;
-                    if (this._cloneAttempt < MAX_PREVIEW_GENERATION_ATTEMPTS)
-                        return GLib.SOURCE_CONTINUE;
-                }
-                delete this._cloneTextureLater;
+                this._cloneTextureId = 0;
                 return GLib.SOURCE_REMOVE;
             });
+            GLib.Source.set_name_by_id(this._cloneTextureId, '[dash-to-dock] this._cloneTexture');
             return;
         }
 
-        const mutterWindow = metaWin.get_compositor_private();
+        let [width, height] = mutterWindow.get_size();
+        let scale = Math.min(1.0, PREVIEW_MAX_WIDTH/width, PREVIEW_MAX_HEIGHT/height);
         let clone = new Clutter.Clone ({ source: mutterWindow,
                                          reactive: true,
-                                         width: this._width * this._scale,
-                                         height: this._height * this._scale });
+                                         width: width * scale,
+                                         height: height * scale });
 
         // when the source actor is destroyed, i.e. the window closed, first destroy the clone
         // and then destroy the menu item (do this animating out)
@@ -496,11 +461,11 @@ class WindowPreviewMenuItem extends PopupMenu.PopupBaseMenuItem {
             // use an idle handler to avoid mapping problems -
             // see comment in Workspace._windowAdded
             let activationEvent = Clutter.get_current_event();
-            this._windowAddedLater = Meta.later_add(Meta.LaterType.BEFORE_REDRAW, () => {
-                delete this._windowAddedLater;
+            let id = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                 this.emit('activate', activationEvent);
                 return GLib.SOURCE_REMOVE;
             });
+            GLib.Source.set_name_by_id(id, '[dash-to-dock] this.emit');
         }
     }
 
@@ -603,14 +568,9 @@ class WindowPreviewMenuItem extends PopupMenu.PopupBaseMenuItem {
     }
 
     _onDestroy() {
-        if (this._cloneTextureLater) {
-            Meta.later_remove(this._cloneTextureLater);
-            delete this._cloneTextureLater;
-        }
-
-        if (this._windowAddedLater) {
-            Meta.later_remove(this._windowAddedLater);
-            delete this._windowAddedLater;
+        if (this._cloneTextureId) {
+            GLib.source_remove(this._cloneTextureId);
+            this._cloneTextureId = 0;
         }
 
         if (this._windowAddedId > 0) {

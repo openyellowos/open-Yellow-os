@@ -23,8 +23,7 @@ const OverlapStatus = {
 const IntellihideMode = {
     ALL_WINDOWS: 0,
     FOCUS_APPLICATION_WINDOWS: 1,
-    MAXIMIZED_WINDOWS: 2,
-    ALWAYS_ON_TOP: 3,
+    MAXIMIZED_WINDOWS : 2
 };
 
 // List of windows type taken into account. Order is important (keep the original
@@ -253,7 +252,7 @@ var Intellihide = class DashToDock_Intellihide {
         let wksp_index = wksp.index();
 
         // Depending on the intellihide mode, exclude non-relevent windows
-        switch (Docking.DockManager.settings.intellihideMode) {
+        switch (Docking.DockManager.settings.get_enum('intellihide-mode')) {
             case IntellihideMode.ALL_WINDOWS:
                 // Do nothing
                 break;
@@ -284,15 +283,6 @@ var Intellihide = class DashToDock_Intellihide {
                 // Skip unmaximized windows
                 if (!meta_win.maximized_vertically && !meta_win.maximized_horizontally)
                     return false;
-                break;
-
-            case IntellihideMode.ALWAYS_ON_TOP:
-                // Always on top, except for fullscreen windows
-                if (this._focusApp) {
-                    const { focusWindow } = global.display;
-                    if (!focusWindow?.fullscreen)
-                        return false;
-                }
                 break;
         }
 

@@ -4,6 +4,7 @@ alsa-utils
 anacron
 at-spi2-core
 avahi-daemon
+axel
 #baobab
 base-files
 bluetooth
@@ -31,7 +32,6 @@ firefox-esr
 firefox-esr-l10n-ja
 firmware-amd-graphics
 firmware-atheros
-firmware-b43-installer
 firmware-bnx2
 firmware-bnx2x
 firmware-brcm80211
@@ -89,7 +89,7 @@ gnome-keyring
 gnome-logs
 #gnome-maps
 gnome-menus
-#gnome-multi-writer
+gnome-multi-writer
 gnome-online-accounts
 #gnome-online-miners
 gnome-photos
@@ -143,12 +143,11 @@ libpam-gnome-keyring
 libproxy1-plugin-gsettings
 libproxy1-plugin-networkmanager
 libproxy1-plugin-webkit
-libpython3.11
 librsvg2-common
 libspa-0.2-bluetooth
 linux-image-amd64
 locales-all
-mintstick
+#mintstick
 mlocate
 mozc-utils-gui
 nano
@@ -166,6 +165,7 @@ poppler-data
 #printer-driver-cups-pdf
 pulseaudio
 pulseaudio-module-bluetooth
+python3
 resolvconf
 #rhythmbox
 rsync
@@ -192,7 +192,8 @@ usrmerge
 vim
 #vlc
 wget
-xdg-desktop-portal-gnome
+#xdg-desktop-portal-gnome
+xdg-user-dirs-gtk
 xdg-utils
 xorg
 xserver-xorg-input-all

@@ -11,7 +11,7 @@ open.Yellow.osでビルドすることを想定しています。
 # 事前準備
 ビルドに必要なパッケージをインストールします。
 
-`sudo apt install debootstrap syslinux-utils zsync expect git`
+`sudo apt install debootstrap syslinux-utils zsync expect git xorriso mkisofs genisoimage`
 
 ※Ubuntuでビルドする場合は「binutils」も必要です。
 

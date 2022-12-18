@@ -1287,6 +1287,8 @@ do_stage_4() {
      #----------------------------
      #コマンド実行
      #----------------------------
+    #Template/COMMON/package.listに記載するとエラーになるため、こっちに追加
+    sudo apt install -y firmware-b43-installer
      #アプリが応答なしになるまでの時間を長くする
     #gsettings set org.gnome.mutter check-alive-timeout 10000
      #設定⇒色をクリックすると、設定アプリが落ちる不具合の対策
@@ -1300,10 +1302,10 @@ do_stage_4() {
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
      #テーマを変更
     update-alternatives --install /usr/share/desktop-base/active-theme desktop-theme /usr/share/desktop-base/oyo-theme 60
-    #powertopを削除
-    apt purge -y powertop
-    #Gnomeヘルプを削除
-    apt purge -y yelp yelp-xsl gnome-user-docs
+    #plymouthの変更
+    update-alternatives --install  /usr/share/plymouth/themes/default.plymouth default.plymouth /usr/share/plymouth/themes/spinner 60
+     #不要なアプリを削除
+    apt purge -y yelp yelp-xsl malcontent-gui
      #アイコン差し替え
     ln -fs /usr/share/icons/gnome/16x16/places/oyo-logo-16.png /etc/alternatives/start-here-16.png
     ln -fs /usr/share/icons/gnome/22x22/places/oyo-logo-22.png /etc/alternatives/start-here-22.png

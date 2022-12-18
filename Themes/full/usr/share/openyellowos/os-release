@@ -1,8 +1,8 @@
-PRETTY_NAME="open.Yellow.os 22.11-beta3 (dandelion)"
+PRETTY_NAME="open.Yellow.os 22.12-bullseye (dandelion)"
 NAME="open.Yellow.os"
-VERSION_ID="22.11-beta3"
-VERSION="22.11-beta3 (dandelion)"
-VERSION_CODENAME=testing
+VERSION_ID="22.12-bullseye"
+VERSION="22.12-bullseye (dandelion)"
+VERSION_CODENAME=bullseye
 ID=debian
 ID_LIKE=debian
 HOME_URL="https://openyellowos.com/"
