@@ -1287,6 +1287,10 @@ do_stage_4() {
      #----------------------------
      #コマンド実行
      #----------------------------
+    #flathubリポジトリを追加
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    #Popsicleをflathubからインストール
+    flatpak install -y flathub com.system76.Popsicle
     #Template/COMMON/package.listに記載するとエラーになるため、こっちに追加
     sudo apt install -y firmware-b43-installer
      #アプリが応答なしになるまでの時間を長くする
@@ -1298,8 +1302,6 @@ do_stage_4() {
      #起動時のネットワークチェックに時間がかかるため無効化
     systemctl disable systemd-networkd-wait-online.service
     systemctl mask systemd-networkd-wait-online.service
-    #flathubリポジトリを追加
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
      #テーマを変更
     update-alternatives --install /usr/share/desktop-base/active-theme desktop-theme /usr/share/desktop-base/oyo-theme 60
     #plymouthの変更
