@@ -89,7 +89,7 @@ gnome-keyring
 gnome-logs
 #gnome-maps
 gnome-menus
-gnome-multi-writer
+#gnome-multi-writer
 gnome-online-accounts
 #gnome-online-miners
 gnome-photos
