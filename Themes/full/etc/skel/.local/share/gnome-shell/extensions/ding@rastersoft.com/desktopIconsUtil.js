@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const Gtk = imports.gi.Gtk;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
@@ -171,23 +171,27 @@ function getMounts(volumeMonitor) {
     return result;
 }
 
-function getFileExtensionOffset(filename, isDirectory) {
+function getFileExtensionOffset(filename, opts={'isDirectory':false}) {
     let offset = filename.length;
-
-    if (!isDirectory) {
-        let doubleExtensions = ['.gz', '.bz2', '.sit', '.Z', '.bz', '.xz'];
-        for (let extension of doubleExtensions) {
-            if (filename.endsWith(extension)) {
-                offset -= extension.length;
+    let extension = '';
+    if (! opts.isDirectory) {
+        const doubleExtensions = ['.gz', '.bz2', '.sit', '.Z', '.bz', '.xz'];
+        for (const item of doubleExtensions) {
+            if (filename.endsWith(item)) {
+                offset -= item.length;
+                extension = filename.substring(offset);
                 filename = filename.substring(0, offset);
                 break;
             }
         }
         let lastDot = filename.lastIndexOf('.');
-        if (lastDot > 0)
+        if (lastDot > 0) {
             offset = lastDot;
+            extension = filename.substring(offset) + extension;
+            filename = filename.substring(0, offset);
+        }
     }
-    return offset;
+    return {'offset': offset, 'basename': filename, 'extension': extension};
 }
 
 function getFilesFromNautilusDnD(selection, type) {

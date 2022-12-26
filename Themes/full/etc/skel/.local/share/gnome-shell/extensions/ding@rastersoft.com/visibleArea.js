@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const Main = imports.ui.main;
 const Signals = imports.signals;
 const GLib = imports.gi.GLib;

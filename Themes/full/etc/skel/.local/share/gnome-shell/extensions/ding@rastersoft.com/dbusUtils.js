@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const { Gio, GLib, Gdk, Gtk } = imports.gi;
 const ByteArray = imports.byteArray;
 const Signals = imports.signals;
 const DBusInterfaces = imports.dbusInterfaces;
+const DesktopIconsUtil = imports.desktopIconsUtil;
 
 var NautilusFileOperations2 = null;
 var FreeDesktopFileManager = null;
@@ -60,30 +61,33 @@ class ProxyManager {
         this._signalsIDs = {};
         this._connectSignals = {};
         this._connectSignalsIDs = {};
+        this._beingLaunched = false;
         if (typeof(programNeeded) == 'string') {
             // if 'programNeeded' is a string, create a generic message for the notification.
             this._programNeeded = [
                 _('"${programName}" is needed for Desktop Icons').replace('${programName}', programNeeded),
-                _('For this functionality to work in Desktop Icons, you must install "${programName}" in your system.').replace('${programName}', programNeeded)
+                _('For this functionality to work in Desktop Icons, you must install "${programName}" in your system.').replace('${programName}', programNeeded),
+                programNeeded
             ];
         } else {
             // instead, if it's not, it is presumed to be an array with two sentences, one for the notification title and another for the main text.
             this._programNeeded = programNeeded;
         }
         this._timeout = 0;
-        this._available = this._dbusManager.checkIsAvailable(this._serviceName, this._inSystemBus);
-        if (this._available) {
+        this._available = false;
+        this._proxy = null;
+        if (this._dbusManager.checkIsAvailable(this._serviceName, this._inSystemBus)) {
             this.makeNewProxy();
-        } else {
-            this._proxy = null;
         }
         dbusManager.connect(inSystemBus ? 'changed-availability-system' : 'changed-availability-local', () => {
-            let newAvailability = this._dbusManager.checkIsAvailable(this._serviceName, this._inSystemBus);
+            const newAvailability = this._dbusManager.checkIsAvailable(this._serviceName, this._inSystemBus);
             if (newAvailability != this._available) {
-                this._available = newAvailability;
-                this.emit('changed-status', newAvailability);
-                if (this._available) {
+                if (newAvailability) {
                     this.makeNewProxy();
+                } else {
+                    this._available = false;
+                    this._proxy = null;
+                    this.emit('changed-status', false);
                 }
             }
         });
@@ -121,30 +125,48 @@ class ProxyManager {
         }
     }
 
-    makeNewProxy() {
+    async makeNewProxy(delay = 0) {
+        if (delay !== 0) {
+            await DesktopIconsUtil.waitDelayMs(delay);
+            if (!this._dbusManager.checkIsAvailable(this._serviceName, this._inSystemBus)) {
+                return;
+            }
+        }
+        if (this._beingLaunched) {
+            return;
+        }
         this._interfaceXML = this._dbusManager.getInterface(this._serviceName, this._objectName, this._interfaceName, this._inSystemBus, false);
         if (this._interfaceXML) {
+            this._beingLaunched = true;
             try {
-                this._proxy = new Gio.DBusProxy.makeProxyWrapper(this._interfaceXML)(
+                new Gio.DBusProxy.makeProxyWrapper(this._interfaceXML)(
                     this._inSystemBus ? Gio.DBus.system : Gio.DBus.session,
                     this._serviceName,
                     this._objectName,
-                    null
+                    (proxy, error) => {
+                        this._beingLaunched = false;
+                        if (error === null) {
+                            for (let signal in this._signals) {
+                                this._signalsIDs[signal] = proxy.connect(signal, this._signals[signal]);
+                            }
+                            for (let signal in this._connectSignals) {
+                                this._connectSignalsIDs[signal] = proxy.connectSignal(signal, this._connectSignals[signal]);
+                            }
+                            this._available = true;
+                            this._proxy = proxy;
+                            print(`DBus interface for ${this._programNeeded[2]} (${this._interfaceName}) is now available.`);
+                            this.emit('changed-status', true);
+                        } else {
+                            logError(error, `Error creating proxy, ${this._programNeeded[2]} (${this._interfaceName}); relaunching.\n`);
+                            this.makeNewProxy(1000);
+                        }
+                    }
                 );
-                for (let signal in this._signals) {
-                    this._signalsIDs[signal] = this._proxy.connect(signal, this._signals[signal]);
-                }
-                for (let signal in this._connectSignals) {
-                    this._connectSignalsIDs[signal] = this._proxy.connectSignal(signal, this._connectSignals[signal]);
-                }
             } catch(e) {
-                this._available = false;
-                this._proxy = null;
-                print(`Error creating proxy, ${this._programNeeded[0]}: ${e.message}\n${e.stack}`);
+                logError(e, `Error creating proxy, ${this._programNeeded[0]}`);
+                this._beingLaunched = false;
+                this.makeNewProxy(1000);
             }
-        } else {
-            this._available = false;
-            this._proxy = null;
         }
     }
 
@@ -395,7 +417,7 @@ class DBusManager {
         try {
             data = wraper.IntrospectSync()[0];
         } catch(e) {
-            print(`Error getting introspection data over Dbus: ${e.message}\n${e.stack}`);
+            logError(e, `Error getting introspection data over Dbus.`);
         }
         if (data == null) {
             return null;

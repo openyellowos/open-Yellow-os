@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
@@ -42,6 +42,7 @@ const _ = Gettext.gettext;
 var desktopIconItem = class desktopIconItem {
 
     constructor(desktopManager, fileExtra) {
+        this._signalIds = [];
         this._desktopManager = desktopManager;
         this._fileExtra = fileExtra;
         this._loadThumbnailDataCancellable = null;
@@ -82,16 +83,31 @@ var desktopIconItem = class desktopIconItem {
         if (this._loadThumbnailDataCancellable) {
             this._loadThumbnailDataCancellable.cancel();
         }
-        /* Container */
-        if (this._containerId) {
-            this.container.disconnect(this._containerId);
-            this._containerId = 0;
+        /* Disconnect signals */
+        for(let [object, signalId] of this._signalIds) {
+            object.disconnect(signalId);
         }
+        this._signalIds = [];
+        this.container.destroy();
+        this.container = null;
+        this._eventBox = null;
+        this._shieldEventBox = null;
+        this._labelEventBox = null;
+        this._shieldLabelEventBox = null;
+        this._icon = null;
+        this._iconContainer = null;
+        this._label = null;
+        this._labelContainer = null;
+        this.iconRectangle = null;
     }
 
     _onDestroy() {
         this._destroy();
         this._destroyed = true;
+    }
+
+    _connectSignal(object, signal, callback) {
+        this._signalIds.push([object, object.connect(signal, callback)]);
     }
 
     /***********************
@@ -100,18 +116,18 @@ var desktopIconItem = class desktopIconItem {
 
     _createIconActor() {
         this.container = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, halign: Gtk.Align.CENTER});
-        this._containerId = this.container.connect('destroy', () => this._onDestroy());
+        this._connectSignal(this.container, 'destroy', () => this._onDestroy());
         this._eventBox = new Gtk.EventBox({visible: true, halign: Gtk.Align.CENTER});
-        this._sheildEventBox = new Gtk.EventBox({visible: true, halign: Gtk.Align.CENTER});
+        this._shieldEventBox = new Gtk.EventBox({visible: true, halign: Gtk.Align.CENTER});
         this._labelEventBox = new Gtk.EventBox({visible: true, halign: Gtk.Align.CENTER});
-        this._sheildLabelEventBox = new Gtk.EventBox({visible: true, halign: Gtk.Align.CENTER});
+        this._shieldLabelEventBox = new Gtk.EventBox({visible: true, halign: Gtk.Align.CENTER});
 
         this._icon = new Gtk.Image();
         this._iconContainer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL});
         this._iconContainer.pack_start(this._icon, true, true, 0);
         this._iconContainer.set_baseline_position(Gtk.BaselinePosition.CENTER);
         this._eventBox.add(this._iconContainer);
-        this._sheildEventBox.add(this._eventBox);
+        this._shieldEventBox.add(this._eventBox);
 
         this._label = new Gtk.Label();
         this._labelContainer = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, halign: Gtk.Align.CENTER});
@@ -121,6 +137,7 @@ var desktopIconItem = class desktopIconItem {
         } else {
             labelStyleContext.add_class('file-label');
         }
+        labelStyleContext = undefined; // prevent memory leaks
         this._label.set_ellipsize(Pango.EllipsizeMode.END);
         this._label.set_line_wrap(true);
         this._label.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
@@ -129,10 +146,10 @@ var desktopIconItem = class desktopIconItem {
         this._label.set_lines(2);
         this._labelContainer.pack_start(this._label, false, true, 0);
         this._labelEventBox.add(this._labelContainer);
-        this._sheildLabelEventBox.add(this._labelEventBox);
+        this._shieldLabelEventBox.add(this._labelEventBox);
 
-        this.container.pack_start(this._sheildEventBox, false, false, 0);
-        this.container.pack_start(this._sheildLabelEventBox, false, false, 0);
+        this.container.pack_start(this._shieldEventBox, false, false, 0);
+        this.container.pack_start(this._shieldLabelEventBox, false, false, 0);
 
         this._styleContext = this._iconContainer.get_style_context();
         this._labelStyleContext = this._labelContainer.get_style_context();
@@ -147,39 +164,39 @@ var desktopIconItem = class desktopIconItem {
          * The solution is to allow them to pass in a EventBox, used both for detecting the events and the DnD, and block them
          * in a second EventBox, located outside.
          */
-        this._sheildEventBox.connect('button-press-event', (actor, event) => {return true;});
-        this._sheildLabelEventBox.connect('button-press-event', (actor, event) => {return true;});
-        this._eventBox.connect('button-press-event', (actor, event) => this._onPressButton(actor, event));
-        this._eventBox.connect('enter-notify-event', (actor, event) => this._onEnter(this._eventBox));
-        this._eventBox.connect('leave-notify-event', (actor, event) => this._onLeave(this._eventBox));
-        this._eventBox.connect('button-release-event', (actor, event) => this._onReleaseButton(actor, event));
-        this._eventBox.connect('drag-motion', (widget, context, x, y, time) => {
+        this._connectSignal(this._shieldEventBox, 'button-press-event', (actor, event) => {return true;});
+        this._connectSignal(this._shieldLabelEventBox, 'button-press-event', (actor, event) => {return true;});
+        this._connectSignal(this._eventBox, 'button-press-event', (actor, event) => this._onPressButton(actor, event));
+        this._connectSignal(this._eventBox, 'enter-notify-event', (actor, event) => this._onEnter(this._eventBox));
+        this._connectSignal(this._eventBox, 'leave-notify-event', (actor, event) => this._onLeave(this._eventBox));
+        this._connectSignal(this._eventBox, 'button-release-event', (actor, event) => this._onReleaseButton(actor, event));
+        this._connectSignal(this._eventBox, 'drag-motion', (widget, context, x, y, time) => {
             this.highLightDropTarget(x, y);
             this._updateDragStatus(context, time);
         });
-        this._eventBox.connect('drag-leave', () => {
+        this._connectSignal(this._eventBox, 'drag-leave', () => {
             this.unHighLightDropTarget();
         });
-        this._eventBox.connect('size-allocate', () => this._calculateIconRectangle());
-        this._labelEventBox.connect('button-press-event', (actor, event) => this._onPressButton(actor, event));
-        this._labelEventBox.connect('enter-notify-event', (actor, event) => this._onEnter(this._labelEventBox));
-        this._labelEventBox.connect('leave-notify-event', (actor, event) => this._onLeave(this._labelEventBox));
-        this._labelEventBox.connect('button-release-event', (actor, event) => this._onReleaseButton(actor, event));
-        this._labelEventBox.connect('drag-motion', (widget, context, x, y, time) => {
+        this._connectSignal(this._eventBox, 'size-allocate', () => this._calculateIconRectangle());
+        this._connectSignal(this._labelEventBox, 'button-press-event', (actor, event) => this._onPressButton(actor, event));
+        this._connectSignal(this._labelEventBox, 'enter-notify-event', (actor, event) => this._onEnter(this._labelEventBox));
+        this._connectSignal(this._labelEventBox, 'leave-notify-event', (actor, event) => this._onLeave(this._labelEventBox));
+        this._connectSignal(this._labelEventBox, 'button-release-event', (actor, event) => this._onReleaseButton(actor, event));
+        this._connectSignal(this._labelEventBox, 'drag-motion', (widget, context, x, y, time) => {
             this.highLightDropTarget(x, y);
             this._updateDragStatus(context, time);
         });
-        this._labelEventBox.connect('drag-leave', () => {
+        this._connectSignal(this._labelEventBox, 'drag-leave', () => {
             this.unHighLightDropTarget();
         });
-        this._labelEventBox.connect('size-allocate', () => {
+        this._connectSignal(this._labelEventBox, 'size-allocate', () => {
             this._doLabelSizeAllocated();
         });
-        this.container.connect('drag-motion', (widget, context, x, y, time) => {
+        this._connectSignal(this.container, 'drag-motion', (widget, context, x, y, time) => {
             this.highLightDropTarget(x, y);
             this._updateDragStatus(context, time);
         });
-        this.container.connect('drag-leave', () => {
+        this._connectSignal(this.container, 'drag-leave', () => {
             this.unHighLightDropTarget();
         });
 
@@ -201,33 +218,28 @@ var desktopIconItem = class desktopIconItem {
     _calculateIconRectangle() {
         this.iconwidth = this._iconContainer.get_allocated_width();
         this.iconheight = this._iconContainer.get_allocated_height();
-        let x = this._x1 + ((this.width - this.iconwidth)/2)*this._zoom;
-        let y = this._y1 + 2;
+        let [x, y] = this._grid.coordinatesLocalToGlobal(0, 0, this._iconContainer);
         this.iconRectangle.x = x;
         this.iconRectangle.y = y;
-        this.iconRectangle.width = this.iconwidth*this._zoom;
-        this.iconRectangle.height = this.iconheight*this._zoom;
+        this.iconRectangle.width = this.iconwidth;
+        this.iconRectangle.height = this.iconheight;
     }
 
     _calculateLabelRectangle() {
         this.labelwidth = this._labelContainer.get_allocated_width();
         this.labelheight = this._labelContainer.get_allocated_height();
-        let x = this._x1 + ((this.width - this.labelwidth)/2)*this._zoom;
-        let y = this._y1 + 4 + (this.iconheight)*this._zoom;
+        let [x, y] = this._grid.coordinatesLocalToGlobal(0, 0, this._labelContainer);
         this.labelRectangle.x = x;
         this.labelRectangle.y = y;
-        this.labelRectangle.width = this.labelwidth*this._zoom;
-        this.labelRectangle.height = this.labelheight*this._zoom;
+        this.labelRectangle.width = this.labelwidth;
+        this.labelRectangle.height = this.labelheight;
     }
 
-    setCoordinates(x, y, width, height, margin, zoom, grid) {
+    setCoordinates(x, y, width, height, margin, grid) {
         this._x1 = x;
         this._y1 = y;
         this.width = width;
         this.height = height;
-        this._zoom = zoom;
-        this._x2 = x + (width * zoom) - 1;
-        this._y2 = y + (height * zoom) - 1;
         this._grid = grid;
         this.container.set_size_request(width, height);
         this._label.margin_start = margin;
@@ -239,6 +251,8 @@ var desktopIconItem = class desktopIconItem {
     }
 
     getCoordinates() {
+        this._x2 = this._x1 + this.container.get_allocated_width() - 1;
+        this._y2 = this._y1 + this.container.get_allocated_height() - 1;
         return [this._x1, this._y1, this._x2, this._y2, this._grid];
     }
 
@@ -455,7 +469,8 @@ var desktopIconItem = class desktopIconItem {
                     Enums.DndTargetInfo.URI_LIST);
         }
         widget.drag_source_set_target_list(targets);
-        widget.connect('drag-begin', (widget, context) => {
+        targets = undefined; // prevent memory leaks
+        this._connectSignal(widget, 'drag-begin', (widget, context) => {
             const scale = this._icon.get_scale_factor();
             let surf = new Cairo.ImageSurface(Cairo.SurfaceType.IMAGE, this.container.get_allocated_width() * scale, this.container.get_allocated_height() * scale);
             // setDeviceScale was introduced to GJS in version 1.69.2
@@ -486,15 +501,16 @@ var desktopIconItem = class desktopIconItem {
             let [x, y] = this._calculateOffset(widget);
             context.set_hotspot(x,y);
             this._desktopManager.onDragBegin(this);
+            cr.$dispose();
         });
-        widget.connect('drag-data-get', (widget, context, data, info, time) => {
+        this._connectSignal(widget, 'drag-data-get', (widget, context, data, info, time) => {
             let dragData = this._desktopManager.fillDragDataGet(info);
             if (dragData != null) {
                 let list = ByteArray.fromString(dragData[1]);
                 data.set(dragData[0], 8, list);
             }
         });
-        widget.connect('drag-end', (widget, context) => {
+        this._connectSignal(widget, 'drag-end', (widget, context) => {
             this._desktopManager.onDragEnd();
         })
     }
@@ -548,16 +564,15 @@ var desktopIconItem = class desktopIconItem {
             return;
         }
         let icon_set = false;
-        if ((Prefs.nautilusSettings.get_string('show-image-thumbnails') != 'never') &&
-            (this._desktopManager.thumbnailLoader.canThumbnail(this))) {
-                let thumbnail = this._desktopManager.thumbnailLoader.getThumbnail(this, this._updateIcon.bind(this));
-                if (thumbnail != null) {
-                    let thumbnailFile = Gio.File.new_for_path(thumbnail);
-                    icon_set = await this._loadImageAsIcon(thumbnailFile);
-                    if (this._destroyed) {
-                        return;
-                    }
+        if (Prefs.nautilusSettings.get_string('show-image-thumbnails') != 'never') {
+            let thumbnail = this._desktopManager.thumbnailLoader.getThumbnail(this, this._updateIcon.bind(this));
+            if (thumbnail != null) {
+                let thumbnailFile = Gio.File.new_for_path(thumbnail);
+                icon_set = await this._loadImageAsIcon(thumbnailFile);
+                if (this._destroyed) {
+                    return;
                 }
+            }
         }
 
         if (!icon_set) {

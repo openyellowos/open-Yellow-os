@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const Gtk = imports.gi.Gtk;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
@@ -48,20 +48,10 @@ var AskRenamePopup = class {
         contentBox.attach(this._textArea, 0, 1, 1, 1);
         this._button = new Gtk.Button({label: allowReturnOnSameName ? _("OK") : _("Rename")});
         contentBox.attach(this._button, 1, 1, 1, 1);
-        this._button.connect('clicked', () => {
-            this._do_rename();
-        });
-        this._textArea.connect('changed', () => {
-            this._validate();
-        });
-        this._textArea.connect('activate', () => {
-            if (this._button.sensitive) {
-                this._do_rename();
-            }
-        });
-        this._popover.connect('closed', () => {
-            closeCB();
-        });
+        this._buttonId = this._button.connect('clicked', this._do_rename.bind(this));
+        this._textAreaChangedId = this._textArea.connect('changed', this._validate.bind(this));
+        this._textAreaActivateId = this._textArea.connect('activate', this._do_rename.bind(this));
+        this._popoverId = this._popover.connect('closed', this._cleanAll.bind(this));
         this._textArea.set_can_default(true);
         this._popover.set_default_widget(this._textArea);
         this._button.get_style_context().add_class("suggested-action");
@@ -69,7 +59,15 @@ var AskRenamePopup = class {
         this._popover.popup();
         this._validate();
         this._textArea.grab_focus_without_selecting();
-        this._textArea.select_region(0, DesktopIconsUtil.getFileExtensionOffset(fileItem.fileName, fileItem.isDirectory));
+        this._textArea.select_region(0, DesktopIconsUtil.getFileExtensionOffset(fileItem.fileName, {'isDirectory':fileItem.isDirectory}).offset);
+    }
+
+    _cleanAll() {
+        this._button.disconnect(this._buttonId);
+        this._textArea.disconnect(this._textAreaActivateId);
+        this._textArea.disconnect(this._textAreaChangedId);
+        this._popover.disconnect(this._popoverId);
+        this._closeCB();
     }
 
     updateFileItem(fileItem) {
@@ -99,8 +97,10 @@ var AskRenamePopup = class {
     }
 
     _do_rename() {
+        if (!this._button.sensitive) {
+            return;
+        }
         this._popover.popdown();
-        this._closeCB();
         if (this._fileItem.fileName == this._textArea.text) {
             return;
         }
@@ -111,6 +111,5 @@ var AskRenamePopup = class {
 
     closeWindow() {
         this._popover.popdown();
-        this._closeCB();
     }
 };

@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const GLib = imports.gi.GLib;
 const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
@@ -29,6 +29,7 @@ const DesktopGrid = imports.desktopGrid;
 const DesktopIconsUtil = imports.desktopIconsUtil;
 const Prefs = imports.preferences;
 const Enums = imports.enums;
+const NotifyX11UnderWayland = imports.notifyX11UnderWayland;
 const DBusUtils = imports.dbusUtils;
 const AskRenamePopup = imports.askRenamePopup;
 const ShowErrorPopup = imports.showErrorPopup;
@@ -45,9 +46,28 @@ var DesktopManager = class {
     constructor(mainApp, dbusManager, desktopList, codePath, asDesktop, primaryIndex) {
 
         this.mainApp = mainApp;
+        this.using_X11 = Gdk.Display.get_default().constructor.$gtype.name === 'GdkX11Display';
         if (asDesktop) {
             this.mainApp.hold(); // Don't close the application if there are no desktops
             this._hold_active = true;
+            if (this.using_X11) {
+                let using_wayland = GLib.getenv("XDG_SESSION_TYPE") == "wayland";
+                if (using_wayland) {
+                    // the system is using Wayland, but GTK is using X11!!!!!!
+                    DBusUtils.extensionControl.activate_action('disableTimer', null);
+                    if (Prefs.desktopSettings.get_boolean('check-x11wayland')) {
+                        this._notifyX11UnderWayland = new NotifyX11UnderWayland.NotifyX11UnderWayland((doNotShowAnymore) => {
+                            this._notifyX11UnderWayland = null;
+                            if (doNotShowAnymore) {
+                                Prefs.desktopSettings.set_boolean('check-x11wayland', false);
+                            }
+                        });
+                    }
+                }
+            } else {
+                // if the problem is fixed and appears again, DING should show the message
+                Prefs.desktopSettings.set_boolean('check-x11wayland', true);
+            }
         }
         this._selectedFiles = null;
 
@@ -122,7 +142,7 @@ var DesktopManager = class {
                 return;
             }
             if (key == 'icon-size') {
-                this._fileList.forEach(x => x.removeFromGrid());
+                this._fileList.forEach(x => x.removeFromGrid(false));
                 for (let desktop of this._desktops) {
                     desktop.resizeGrid();
                 }
@@ -202,13 +222,12 @@ var DesktopManager = class {
         let cssProvider = new Gtk.CssProvider();
         cssProvider.load_from_file(Gio.File.new_for_path(GLib.build_filenamev([codePath, "stylesheet.css"])));
         Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), cssProvider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-
+        cssProvider = undefined;
         this._configureSelectionColor();
         this._createDesktopBackgroundMenu();
         this._createGridWindows();
 
         DBusUtils.NautilusFileOperations2.connectToProxy('g-properties-changed', this._undoStatusChanged.bind(this));
-        this._syncUndoRedo();
         DBusUtils.GtkVfsMetadata.connectSignalToProxy('AttributeChanged', this._metadataChanged.bind(this));
         this._allFileList = null;
         this._fileList = [];
@@ -257,19 +276,23 @@ var DesktopManager = class {
     _metadataChanged(proxy, nameOwner, args) {
         let filepath = GLib.build_filenamev([GLib.get_home_dir(), args[1]]);
         if (this._desktopDir.get_path() === GLib.path_get_dirname(filepath)) {
-            let updateFileList;
-            if (this._allFileList && (this._allFileList.length > 0)) {
-                updateFileList = this._allFileList;
-            } else {
-                updateFileList = this._fileList;
-            }
-            for (let fileItem of updateFileList) {
+            for (let fileItem of this.updateFileList()) {
                 if (fileItem.path == filepath) {
                     fileItem.updatedMetadata();
                     break;
                 }
             }
         }
+    }
+
+    updateFileList() {
+        let updateFileList;
+        if (this._allFileList && (this._allFileList.length > 0)) {
+            updateFileList = this._allFileList;
+        } else {
+            updateFileList = this._fileList;
+        }
+        return updateFileList;
     }
 
     _dbusAdvertiseUpdate() {
@@ -294,7 +317,7 @@ var DesktopManager = class {
             this._primaryIndex = newdesktoplist[0].primaryMonitor;
         }
         if (newdesktoplist.length != this._desktopList.length) {
-            this._fileList.forEach(x => x.removeFromGrid());
+            this._fileList.forEach(x => x.removeFromGrid(false));
             this._desktopList = newdesktoplist;
             if (this._primaryIndex < this._desktopList.length) {
                 this._primaryScreen = this._desktopList[this._primaryIndex];
@@ -330,7 +353,7 @@ var DesktopManager = class {
             }
         }
         if (gridschanged.length > 0) {
-            this._fileList.forEach(x => x.removeFromGrid());
+            this._fileList.forEach(x => x.removeFromGrid(false));
             for (let gridindex of gridschanged) {
                 let desktop = this._desktops[gridindex];
                 desktop.updateGridDescription(newdesktoplist[gridindex]);
@@ -447,6 +470,7 @@ var DesktopManager = class {
         }
         // force to store the new coordinates
         this._addFilesToDesktop(fileItems, Enums.StoredCoordinates.OVERWRITE);
+        fileItems = undefined;
         if (this.keepArranged) {
             this._updateDesktop().catch((e) => {
                 print(`Exception while doing move with drag and drop and keeping arranged: ${e.message}\n${e.stack}`);
@@ -643,6 +667,7 @@ var DesktopManager = class {
             this._newDocumentItem.show_all();
         }
         this._pasteMenuItem.set_sensitive(false);
+        this._syncUndoRedo();
         this._updateClipBoard();
     }
 
@@ -693,6 +718,11 @@ var DesktopManager = class {
     }
 
     _syncUndoRedo() {
+        if (!DBusUtils.RemoteFileOperations.isAvailable) {
+            this._undoMenuItem.hide();
+            this._redoMenuItem.hide();
+            return;
+        }
         switch (DBusUtils.RemoteFileOperations.UndoStatus()) {
             case Enums.UndoStatus.UNDO:
                 this._undoMenuItem.show();
@@ -923,6 +953,7 @@ var DesktopManager = class {
         let contentArea = this._findFileWindow.get_content_area();
         this._findFileTextArea = new Gtk.Entry();
         contentArea.pack_start(this._findFileTextArea, true, true, 5);
+        contentArea = undefined;
         this._findFileTextArea.connect('activate', () => {
             if (this._findFileButton.sensitive) {
                 this._findFileWindow.response(Gtk.ResponseType.OK);
@@ -1225,7 +1256,7 @@ var DesktopManager = class {
         this._readingDesktopFiles = true;
         this._forceDraw = false;
         this._lastDesktopUpdateRequest = GLib.get_monotonic_time();
-        let fileList;
+        let fileList = [];
         while(true) {
             this._desktopFilesChanged = false;
             if (! this._desktopDir.query_exists(null)) {
@@ -1656,68 +1687,86 @@ var DesktopManager = class {
         }
     }
 
-    doNewFolder(position) {
-        let X;
-        let Y;
-        if (position) {
-            [X, Y] = position;
+    fileExistsOnDesktop(searchName) {
+        const listOfFileNamesOnDesktop = this.updateFileList().map(f => f.fileName);
+        if (listOfFileNamesOnDesktop.includes(searchName)) {
+            return true;
         } else {
-            [X, Y] = [this._clickX, this._clickY];
+            return false;
         }
-        this.unselectAll();
+    }
+
+    getDesktopUniqueFileName(fileName) {
+        let fileParts = DesktopIconsUtil.getFileExtensionOffset(fileName);
         let i = 0;
-        let baseName = _("New Folder");
-        let newName = baseName;
-        while ( 0 != this._fileList.filter(file => file.fileName == newName).length) {
+        let newName = fileName;
+
+        while(this.fileExistsOnDesktop(newName)) {
             i += 1;
-            newName = baseName + " " + i;
+            newName = `${fileParts.basename} ${i}${fileParts.extension}`;
         }
+        return newName;
+    }
+
+    doNewFolder(position=null, suggestedName=null, opts={rename: true}) {
+        this.unselectAll();
+
+        if (! position) {
+            position = [this._clickX, this._clickY];
+        }
+
+        const baseName = suggestedName ? suggestedName :  _("New Folder");
+        let newName = this.getDesktopUniqueFileName(baseName);
+
         if (newName) {
             let dir = DesktopIconsUtil.getDesktopDir().get_child(newName);
             try {
                 dir.make_directory(null);
-                let info = new Gio.FileInfo();
-                info.set_attribute_string('metadata::nautilus-drop-position', `${X},${Y}`);
+                const info = new Gio.FileInfo();
+                info.set_attribute_string('metadata::nautilus-drop-position', `${position.join(',')}`);
                 info.set_attribute_string('metadata::nautilus-icon-position', '');
                 dir.set_attributes_from_info(info, Gio.FileQueryInfoFlags.NONE, null);
-                this.newFolderDoRename = newName;
-                if (position) {
-                    return dir.get_uri();
-                }
             } catch(e) {
-                print(`Failed to create folder ${e.message}`);
+                logError(e, `Failed to create folder`);
+                const header = _("Folder Creation Failed");
+                const text = _("Error while trying to create a Folder");
+                this.dbusManager.doNotify(header, text);
+                if (position || suggestedName) {
+                    return null;
+                }
+                return;
+            }
+            if (opts.rename) {
+                this.newFolderDoRename = newName;
+            }
+            if (position || suggestedName) {
+                return dir.get_uri();
             }
         }
     }
 
     _newDocument(template) {
-        let file = Gio.File.new_for_path(template);
+        const file = Gio.File.new_for_path(template);
         if ((file == null) || (!file.query_exists(null))) {
             return;
         }
-        let counter = 0;
-        let fullName = file.get_basename();
-        let offset = DesktopIconsUtil.getFileExtensionOffset(fullName, false);
-        let name = fullName.substring(0, offset);
-        let extension = fullName.substring(offset);
 
-        let finalName = `${name}${extension}`;
-        let destination;
-        do {
-            if (counter != 0) {
-                finalName = `${name} ${counter}${extension}`
-            }
-            destination = Gio.File.new_for_path(GLib.build_filenamev([GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP), finalName]));
-            counter++;
-        } while(destination.query_exists(null));
+        const fullName = file.get_basename();
+        const finalName = this.getDesktopUniqueFileName(fullName);
+
+        let destination = Gio.File.new_for_path(GLib.build_filenamev([GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP), finalName]));
+
         try {
             file.copy(destination, Gio.FileCopyFlags.NONE, null, null);
-            let info = new Gio.FileInfo();
+            const info = new Gio.FileInfo();
             info.set_attribute_string('metadata::nautilus-drop-position', `${this._clickX},${this._clickY}`);
             info.set_attribute_string('metadata::nautilus-icon-position', '');
             destination.set_attributes_from_info(info, Gio.FileQueryInfoFlags.NONE, null);
         } catch(e) {
-            print(`Failed to create template ${e.message}`);
+            logError(e, `Failed to create template ${e.message}`);
+            const header = _("Template Creation Failed");
+            const text = _("Error while trying to create a Document");
+            this.dbusManager.doNotify(header, text);
         }
     }
 
@@ -1793,7 +1842,7 @@ var DesktopManager = class {
     doStacks(restack) {
         if (restack) {
             for (let fileItem of this._fileList) {
-                fileItem.removeFromGrid();
+                fileItem.removeFromGrid(false);
             }
         }
         if (! this.stackInitialCoordinates && ! this._allFileList) {
@@ -1809,7 +1858,7 @@ var DesktopManager = class {
 
     _unstack() {
         if (this.stackInitialCoordinates && this._allFileList) {
-            this._fileList.forEach(f => f.removeFromGrid());
+            this._fileList.forEach(f => f.removeFromGrid(false));
             this._restoreStackInitialCoordinates();
             this._fileList = this._allFileList;
             this._allFileList = null;
@@ -2178,7 +2227,7 @@ var DesktopManager = class {
 
     doSorts(cleargrids) {
         if (cleargrids) {
-            this._fileList.map(f => f.removeFromGrid());
+            this._fileList.map(f => f.removeFromGrid(false));
         }
         switch (Prefs.getSortOrder()) {
             case Enums.SortOrder.NAME:

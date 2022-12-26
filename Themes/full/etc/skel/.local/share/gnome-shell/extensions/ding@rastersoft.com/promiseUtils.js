@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 /* This is coming from gjs 1.72, adding options to allow not to replace the
  * original method, in case we want to avoid clashes with already used async
  * methods. This can be dropped when such requirements are not needed */

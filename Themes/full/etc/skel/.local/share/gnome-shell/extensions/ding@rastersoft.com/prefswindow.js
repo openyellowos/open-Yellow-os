@@ -1,3 +1,4 @@
+'use strict';
 const GObject = imports.gi.GObject;
 const Gettext = imports.gettext;
 const Gio = imports.gi.Gio;

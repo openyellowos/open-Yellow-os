@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 imports.gi.versions.Gtk = '3.0';
 const Gtk = imports.gi.Gtk;
 const Gio = imports.gi.Gio;

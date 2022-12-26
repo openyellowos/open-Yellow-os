@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
@@ -130,7 +130,6 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
      ***********************/
 
     _destroy() {
-        super._destroy();
         /* Trash */
         if (this._monitorTrashId) {
             this._monitorTrashDir.disconnect(this._monitorTrashId);
@@ -148,9 +147,13 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
         if (this._setMetadataTrustedCancellable) {
             this._setMetadataTrustedCancellable.cancel();
         }
-        if (this._realizeId) {
+        if (this._realizeId && this.container) {
             this.container.disconnect(this._realizeId);
+            this._realizeId = 0;
         }
+        // call super() after disconnecting everything, because it destroys
+        // the top widget, and that will destroy also all the other widgets.
+        super._destroy();
     }
 
     /***********************
@@ -216,6 +219,7 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
                     this._queryFileInfoCancellable = null;
                     let newFileInfo = source.query_info_finish(result);
                     this._updateMetadataFromFileInfo(newFileInfo);
+                    newFileInfo = undefined;
                     if (rebuild) {
                         this._updateIcon().catch((e) => {
                             print(`Exception while updating the icon after a metadata update: ${e.message}\n${e.stack}`);
@@ -421,7 +425,8 @@ var FileItem = class extends desktopIconItem.desktopIconItem {
                 targets.add(Gdk.atom_intern('x-special/gnome-icon-list', false), 0, 1);
                 targets.add(Gdk.atom_intern('text/uri-list', false), 0, 2);
                 dropDestination.drag_dest_set_target_list(targets);
-                dropDestination.connect('drag-data-received', (widget, context, x, y, selection, info, time) => {
+                targets = undefined;
+                this._connectSignal(dropDestination, 'drag-data-received', (widget, context, x, y, selection, info, time) => {
                     const forceCopy = context.get_selected_action() === Gdk.DragAction.COPY;
                     if (info === Enums.DndTargetInfo.GNOME_ICON_LIST ||
                         info === Enums.DndTargetInfo.URI_LIST) {

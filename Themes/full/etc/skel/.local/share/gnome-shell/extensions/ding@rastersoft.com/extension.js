@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Meta = imports.gi.Meta;
@@ -86,18 +86,19 @@ function enable() {
     }
     // If the desktop is still starting up, we wait until it is ready
     if (Main.layoutManager._startingUp) {
-        data.startupPreparedId = Main.layoutManager.connect('startup-complete', () => { innerEnable(true); });
+        data.startupPreparedId = Main.layoutManager.connect('startup-complete', innerEnable);
     } else {
-        innerEnable(false);
+        data.startupPreparedId = null;
+        innerEnable();
     }
 }
 
 /**
  * The true code that configures everything and launches the desktop program
  */
-function innerEnable(removeId) {
+function innerEnable() {
 
-    if (removeId) {
+    if (data.startupPreparedId !== null) {
         Main.layoutManager.disconnect(data.startupPreparedId);
         data.startupPreparedId = null;
     }
@@ -114,23 +115,17 @@ function innerEnable(removeId) {
      * we kill the desktop program. It will be relaunched automatically with the new geometry,
      * thus adapting to it on-the-fly.
      */
-    data.monitorsChangedId = Main.layoutManager.connect('monitors-changed', () => {
-        updateDesktopGeometry();
-    });
+    data.monitorsChangedId = Main.layoutManager.connect('monitors-changed', updateDesktopGeometry);
     /*
      * Any change in the workareas must be detected too, for example if the used size
      * changes.
      */
-    data.workareasChangedId = global.display.connect('workareas-changed', () => {
-        updateDesktopGeometry();
-    });
+    data.workareasChangedId = global.display.connect('workareas-changed', updateDesktopGeometry);
 
     /*
      * This callback allows to detect a change in the working area (like when changing the Scale value)
      */
-    data.visibleAreaId = data.visibleArea.connect('updated-usable-area', () => {
-        updateDesktopGeometry();
-    });
+    data.visibleAreaId = data.visibleArea.connect('updated-usable-area', updateDesktopGeometry);
 
     data.isEnabled = true;
     if (data.launchDesktopId) {
@@ -152,24 +147,33 @@ function innerEnable(removeId) {
     data.dbusConnectionId = Gio.bus_own_name(Gio.BusType.SESSION, "com.rastersoft.dingextension", Gio.BusNameOwnerFlags.NONE, null, (connection, name) => {
         data.dbusConnection = connection;
 
-        let doCopy = new Gio.SimpleAction({
+        data.doCopy = new Gio.SimpleAction({
             name: 'doCopy',
             parameter_type: new GLib.VariantType('as')
         });
-        let doCut = new Gio.SimpleAction({
+        data.doCut = new Gio.SimpleAction({
             name: 'doCut',
             parameter_type: new GLib.VariantType('as')
         });
-        let desktopGeometry = Gio.SimpleAction.new_stateful('desktopGeometry', new GLib.VariantType('av'), getDesktopGeometry());
-        desktopGeometry.set_enabled(true);
-        doCopy.connect('activate', manageCutCopy);
-        doCut.connect('activate', manageCutCopy);
+        data.disableTimer = new Gio.SimpleAction({
+            name: 'disableTimer'
+        })
+        data.desktopGeometry = Gio.SimpleAction.new_stateful('desktopGeometry', new GLib.VariantType('av'), getDesktopGeometry());
+        data.desktopGeometry.set_enabled(true);
+        data.doCopyId = data.doCopy.connect('activate', manageCutCopy);
+        data.doCutId = data.doCut.connect('activate', manageCutCopy);
+        data.disableTimerId = data.disableTimer.connect('activate', () => {
+            if (data.currentProcess && data.currentProcess.subprocess) {
+                data.currentProcess.cancel_timer();
+            }
+        });
         data.actionGroup = new Gio.SimpleActionGroup();
-        data.actionGroup.add_action(doCopy);
-        data.actionGroup.add_action(doCut);
-        data.actionGroup.add_action(desktopGeometry);
+        data.actionGroup.add_action(data.doCopy);
+        data.actionGroup.add_action(data.doCut);
+        data.actionGroup.add_action(data.disableTimer);
+        data.actionGroup.add_action(data.desktopGeometry);
 
-        this._dbusConnectionGroupId = data.dbusConnection.export_action_group(
+        data.dbusConnectionGroupId = data.dbusConnection.export_action_group(
             '/com/rastersoft/dingextension/control',
             data.actionGroup
         );
@@ -254,16 +258,38 @@ function disable() {
     data.x11Manager.disable();
     data.visibleArea.disable();
 
+    if (data.doCopyId) {
+        data.doCopy.disconnect(data.doCopyId);
+        data.doCopyId = 0;
+        data.doCopy = undefined;
+    }
+
+    if (data.doCutId) {
+        data.doCut.disconnect(data.doCutId);
+        data.doCutId = 0;
+        data.doCut = undefined;
+    }
+
+    if (data.disableTimerId) {
+        data.disableTimer.disconnect(data.disableTimerId);
+        data.disableTimerId = 0;
+        data.disableTimer = undefined;
+    }
+
+    data.desktopGeometry = undefined;
+
     // disconnect signals only if connected
-    if (this._dbusConnectionGroupId) {
-        data.dbusConnection.unexport_action_group(this._dbusConnectionGroupId);
-        this._dbusConnectionGroupId = 0;
+    if (data.dbusConnectionGroupId) {
+        data.dbusConnection.unexport_action_group(data.dbusConnectionGroupId);
+        data.dbusConnectionGroupId = 0;
     }
 
     if (data.dbusConnectionId) {
         Gio.bus_unown_name(data.dbusConnectionId);
         data.dbusConnectionId = 0;
     }
+    data.actionGroup = undefined;
+
     if (data.visibleAreaId) {
         data.visibleArea.disconnect(data.visibleAreaId);
         data.visibleAreaId = 0;
@@ -533,7 +559,6 @@ var LaunchSubprocess = class {
             } catch (e) {
                 if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                     return;
-
                 logError(e, `${this._process_id}_Error`);
             }
 

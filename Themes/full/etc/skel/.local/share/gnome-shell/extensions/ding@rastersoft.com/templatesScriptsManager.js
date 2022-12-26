@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Gtk = imports.gi.Gtk;
@@ -186,8 +186,7 @@ var TemplatesScriptsManager = class {
         for (let fileItem of scriptsList) {
             let menuItemName = fileItem[0];
             if (this._flags & TemplatesScriptsManagerFlags.HIDE_EXTENSIONS) {
-                let offset = DesktopIconsUtil.getFileExtensionOffset(menuItemName, false);
-                menuItemName = menuItemName.substring(0, offset);
+                menuItemName = DesktopIconsUtil.getFileExtensionOffset(menuItemName, false).basename;
             }
             let menuItemPath = fileItem[1];
             let subDirs = fileItem[2];

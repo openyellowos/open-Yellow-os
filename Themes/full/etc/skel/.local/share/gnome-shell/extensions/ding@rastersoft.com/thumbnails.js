@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+'use strict';
 imports.gi.versions.GnomeDesktop = '3.0';
 const GnomeDesktop = imports.gi.GnomeDesktop;
 const GLib = imports.gi.GLib;
@@ -28,8 +28,9 @@ var ThumbnailLoader = class {
         this._thumbList = [];
         this._thumbnailScriptWatch = null;
         this._running = false;
-        this._thumbnailFactory = GnomeDesktop.DesktopThumbnailFactory.new(GnomeDesktop.DesktopThumbnailSize.LARGE);
-        if (this._thumbnailFactory.generate_thumbnail_async) {
+        this._thumbnailFactoryNormal = GnomeDesktop.DesktopThumbnailFactory.new(GnomeDesktop.DesktopThumbnailSize.NORMAL);
+        this._thumbnailFactoryLarge = GnomeDesktop.DesktopThumbnailFactory.new(GnomeDesktop.DesktopThumbnailSize.LARGE);
+        if (this._thumbnailFactoryLarge.generate_thumbnail_async) {
             this._useAsyncAPI = true;
             print("Detected async api for thumbnails");
         } else {
@@ -55,7 +56,7 @@ var ThumbnailLoader = class {
             // if the file disappeared while waiting in the queue, don't refresh the thumbnail
             [file, callback] = this._thumbList.shift();
             if (file.file.query_exists(null)) {
-                if (this._thumbnailFactory.has_valid_failed_thumbnail(file.uri, file.modifiedTime)) {
+                if (this._thumbnailFactoryLarge.has_valid_failed_thumbnail(file.uri, file.modifiedTime)) {
                     if (callback) {
                         callback();
                     }
@@ -77,11 +78,11 @@ var ThumbnailLoader = class {
         let fileInfo = file.file.query_info('standard::content-type,time::modified', Gio.FileQueryInfoFlags.NONE, null);
         this._doCancel = new Gio.Cancellable();
         let modifiedTime = fileInfo.get_attribute_uint64('time::modified');
-        this._thumbnailFactory.generate_thumbnail_async(file.uri, fileInfo.get_content_type(), this._doCancel, (obj, res) => {
+        this._thumbnailFactoryLarge.generate_thumbnail_async(file.uri, fileInfo.get_content_type(), this._doCancel, (obj, res) => {
             this._removeTimeout();
             try {
                 let thumbnailPixbuf = obj.generate_thumbnail_finish(res);
-                this._thumbnailFactory.save_thumbnail_async(thumbnailPixbuf, file.uri, modifiedTime, this._doCancel, (obj, res) => {
+                this._thumbnailFactoryLarge.save_thumbnail_async(thumbnailPixbuf, file.uri, modifiedTime, this._doCancel, (obj, res) => {
                     obj.save_thumbnail_finish(res);
                     if (callback) {
                         callback();
@@ -104,7 +105,7 @@ var ThumbnailLoader = class {
 
     _createFailedThumbnailAsync(file, modifiedTime, callback) {
         this._doCancel = new Gio.Cancellable();
-        this._thumbnailFactory.create_failed_thumbnail_async(file.uri, modifiedTime, this._doCancel, (obj,res) => {
+        this._thumbnailFactoryLarge.create_failed_thumbnail_async(file.uri, modifiedTime, this._doCancel, (obj,res) => {
             try {
                 obj.create_failed_thumbnail_finish(res);
             } catch(e) {
@@ -146,7 +147,7 @@ var ThumbnailLoader = class {
             print(`Timeout while generating thumbnail for ${file.displayName}`);
             this._timeoutID = 0;
             this._proc.force_exit();
-            this._thumbnailFactory.create_failed_thumbnail(file.uri, file.modifiedTime);
+            this._thumbnailFactoryLarge.create_failed_thumbnail(file.uri, file.modifiedTime);
             return false;
         });
     }
@@ -158,18 +159,15 @@ var ThumbnailLoader = class {
         }
     }
 
-    canThumbnail(file) {
-        return this._thumbnailFactory.can_thumbnail(file.uri,
-                                                    file.attributeContentType,
-                                                    file.modifiedTime);
-    }
-
     getThumbnail(file, callback) {
         try {
-            let thumbnail = this._thumbnailFactory.lookup(file.uri, file.modifiedTime);
+            let thumbnail = this._thumbnailFactoryLarge.lookup(file.uri, file.modifiedTime);
             if (thumbnail == null) {
-                if (!this._thumbnailFactory.has_valid_failed_thumbnail(file.uri, file.modifiedTime)) {
-                    this._generateThumbnail(file, callback);
+                thumbnail = this._thumbnailFactoryNormal.lookup(file.uri, file.modifiedTime);
+                if ((thumbnail == null) &&
+                    !this._thumbnailFactoryLarge.has_valid_failed_thumbnail(file.uri, file.modifiedTime) &&
+                     this._thumbnailFactoryLarge.can_thumbnail(file.uri, file.attributeContentType, file.modifiedTime)) {
+                        this._generateThumbnail(file, callback);
                 }
             }
             return thumbnail;
