@@ -21,8 +21,7 @@ OnFailure=plymouth-quit.service
 
 [Service]
 ExecStartPre=/usr/share/gdm/generate-config
-ExecStart=/usr/bin/bash -c "sleep 3; /usr/sbin/gdm3"
-#ExecStart=/usr/sbin/gdm3
+ExecStart=/usr/sbin/gdm3
 KillMode=mixed
 Restart=always
 RestartSec=1s
