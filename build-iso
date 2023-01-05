@@ -1290,15 +1290,15 @@ do_stage_4() {
     #flathubリポジトリを追加
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     #Popsicleをflathubからインストール
-    flatpak install -y flathub com.system76.Popsicle
+    #flatpak install -y flathub com.system76.Popsicle
     #Template/COMMON/package.listに記載するとエラーになるため、こっちに追加
-    sudo apt install -y firmware-b43-installer
+    apt install -y firmware-b43-installer
      #アプリが応答なしになるまでの時間を長くする
     #gsettings set org.gnome.mutter check-alive-timeout 10000
      #設定⇒色をクリックすると、設定アプリが落ちる不具合の対策
-    sudo apt install -y printer-driver-cups-pdf
-    sudo service cups start
-    sudo lpadmin -p CUPS-PDF -v cups-pdf:/ -m lsb/usr/cups-pdf/CUPS-PDF_opt.ppd -E
+    apt install -y printer-driver-cups-pdf
+    service cups start
+    lpadmin -p CUPS-PDF -v cups-pdf:/ -m lsb/usr/cups-pdf/CUPS-PDF_opt.ppd -E
      #起動時のネットワークチェックに時間がかかるため無効化
     systemctl disable systemd-networkd-wait-online.service
     systemctl mask systemd-networkd-wait-online.service
@@ -1317,9 +1317,9 @@ do_stage_4() {
     ln -fs /usr/share/icons/gnome/256x256/places/oyo-logo-256.png /etc/alternatives/start-here-256.png
     ln -fs /usr/share/icons/gnome/scalable/places/oyo-logo.svg /etc/alternatives/start-here.svg
      #不要なパッケージを削除
-    sudo apt -y autoremove
+    apt -y autoremove
      #システムデータベースを更新
-    sudo dconf update
+    dconf update
 
 
 
