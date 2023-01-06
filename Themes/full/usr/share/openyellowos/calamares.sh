@@ -6,8 +6,10 @@ rm -f /etc/polkit-1/localauthority/50-local.d/47-allow-live-user.pkla
 # remove nopassword
 rm -f /etc/sudoers.d/wheel
 
+#------------------------------------------------------------------
 #インストール時に作成されるユーザーのhomeディレクトリに
 #skelフォルダがコピーされないため、以下コマンドでコピーする
+#------------------------------------------------------------------
 dir_path="/home/*"
 #HOMEディレクトリ直下にあるディレクトリのパスを取得
 dirs=`find $dir_path -maxdepth 0 -type d`
