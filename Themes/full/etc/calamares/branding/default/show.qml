@@ -20,7 +20,7 @@ Presentation
         presentation.goToNextSlide();
     }
 // Uncomment to enable multiple slides
-    Timer {
+   Timer {
         id: advanceTimer
         interval: 10000
         running: presentation.activatedInCalamares
@@ -28,47 +28,87 @@ Presentation
         onTriggered: nextSlide()
     }
 
-    Slide {
+   Slide {
 
         Image {
             id: background1
-            source: "slide1.png"
+            source: "slide01.png"
             width: 800; height: 450
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
         }
     }
-
-    Slide {
+   Slide {
 
         Image {
             id: background2
-            source: "slide2.png"
+            source: "slide02.png"
             width: 800; height: 450
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
         }
     }
-    Slide {
+   Slide {
 
         Image {
             id: background3
-            source: "slide3.png"
+            source: "slide03.png"
             width: 800; height: 450
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
         }
     }
-    Slide {
+   Slide {
 
         Image {
             id: background4
-            source: "slide4.png"
+            source: "slide04.png"
             width: 800; height: 450
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
         }
     }
+   Slide {
+
+        Image {
+            id: background5
+            source: "slide05.png"
+            width: 800; height: 450
+            fillMode: Image.PreserveAspectFit
+            anchors.centerIn: parent
+        }
+    }
+   Slide {
+
+        Image {
+            id: background6
+            source: "slide06.png"
+            width: 800; height: 450
+            fillMode: Image.PreserveAspectFit
+            anchors.centerIn: parent
+        }
+    }
+   Slide {
+
+        Image {
+            id: background7
+            source: "slide07.png"
+            width: 800; height: 450
+            fillMode: Image.PreserveAspectFit
+            anchors.centerIn: parent
+        }
+    }
+   Slide {
+
+        Image {
+            id: background8
+            source: "slide08.png"
+            width: 800; height: 450
+            fillMode: Image.PreserveAspectFit
+            anchors.centerIn: parent
+        }
+    }
+
     // When this slideshow is loaded as a V1 slideshow, only
     // activatedInCalamares is set, which starts the timer (see above).
     //
