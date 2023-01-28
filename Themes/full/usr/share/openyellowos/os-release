@@ -1,7 +1,7 @@
-PRETTY_NAME="open.Yellow.os 23.01-beta4.1 (dandelion)"
+PRETTY_NAME="open.Yellow.os 23.01-beta5.0 (dandelion)"
 NAME="open.Yellow.os"
-VERSION_ID="23.01-beta4.1"
-VERSION="23.01-beta4.1 (dandelion)"
+VERSION_ID="23.01-beta5.0"
+VERSION="23.01-beta5.0 (dandelion)"
 VERSION_CODENAME=bullseye
 ID=debian
 ID_LIKE=debian
