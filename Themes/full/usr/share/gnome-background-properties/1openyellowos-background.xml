@@ -5,7 +5,7 @@
     <name>openyellowos Background01</name>
     <name xml:lang="ja">openyellowos01</name>
     <filename>/usr/share/backgrounds/gnome/openYellowos-wallpaper01.png</filename>
-    <options>scaled</options>
+    <options>zoom</options>
     <shade_type>solid</shade_type>
     <pcolor>#ffffff</pcolor>
     <scolor>#000000</scolor>
@@ -14,7 +14,7 @@
     <name>openyellowos Background02</name>
     <name xml:lang="ja">openyellowos02</name>
     <filename>/usr/share/backgrounds/gnome/openYellowos-wallpaper02.png</filename>
-    <options>scaled</options>
+    <options>zoom</options>
     <shade_type>solid</shade_type>
     <pcolor>#ffffff</pcolor>
     <scolor>#000000</scolor>
@@ -23,7 +23,7 @@
     <name>openyellowos Background03</name>
     <name xml:lang="ja">openyellowos03</name>
     <filename>/usr/share/backgrounds/gnome/openYellowos-wallpaper03.png</filename>
-    <options>scaled</options>
+    <options>zoom</options>
     <shade_type>solid</shade_type>
     <pcolor>#ffffff</pcolor>
     <scolor>#000000</scolor>
