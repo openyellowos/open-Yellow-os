@@ -1305,7 +1305,7 @@ do_stage_4() {
      #テーマを変更
     update-alternatives --install /usr/share/desktop-base/active-theme desktop-theme /usr/share/desktop-base/oyo-theme 60
     #plymouthの変更
-    update-alternatives --install  /usr/share/plymouth/themes/default.plymouth default.plymouth /usr/share/plymouth/themes/spinner 60
+    update-alternatives --install  /usr/share/plymouth/themes/default.plymouth default.plymouth /usr/share/plymouth/themes/oYo 60
      #不要なアプリを削除
     apt purge -y yelp yelp-xsl malcontent-gui
      #アイコン差し替え
