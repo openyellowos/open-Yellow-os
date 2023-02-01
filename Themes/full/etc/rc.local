@@ -10,8 +10,59 @@
 # bits.
 #
 
+
+
+#***********************************************************************************
+# gnome-shell翻訳情報を追加
+#***********************************************************************************
+MO_PATH="/usr/share/locale/ja/LC_MESSAGES/gnome-shell.mo"
+PO_PATH="/usr/share/locale/ja/LC_MESSAGES/gnome-shell.po"
+#-------------------------------------------
+# 翻訳ファイル(mo形式)を、po形式に変換
+#-------------------------------------------
+msgunfmt $MO_PATH -o $PO_PATH
+echo "po形式に変換"
+
+#--------------------------------------------------------------------------------
+# po形式のファイルの中に、"Add to Favorites"がない場合、翻訳情報を追加
+#--------------------------------------------------------------------------------
+if grep -q "Add to Favorites" $PO_PATH; then
+    : # 「:」は何もしないコマンド
+else
+    # $PO_PATHに翻訳情報を追加
+    echo "" >> $PO_PATH
+    echo "msgid \"Add to Favorites\"" >> $PO_PATH
+    echo "msgstr \"お気に入りに追加\"" >> $PO_PATH
+    echo "Add to Favoritesの翻訳情報追加"
+fi
+
+
+#-------------------------------------------------------------------------------------
+# po形式のファイルの中に、"Remove from Favorites"がない場合、翻訳情報を追加
+#-------------------------------------------------------------------------------------
+if grep -q "Remove from Favorites" $PO_PATH; then
+    : # 「:」は何もしないコマンド
+else
+    # $PO_PATHに翻訳情報を追加
+    echo "" >> $PO_PATH
+    echo "msgid \"Remove from Favorites\"" >> $PO_PATH
+    echo "msgstr \"お気に入りから削除\"" >> $PO_PATH
+    echo "Remove from Favoritesの翻訳情報追加"
+fi
+
+#-------------------------------------------------------
+# 修正した翻訳ファイル(po形式)を、mo形式に再変換
+#-------------------------------------------------------
+msgfmt $PO_PATH -o $MO_PATH
+echo "mo形式に変換"
+
+
+#***********************************************************************************
 # os-release の上書き
+#***********************************************************************************
 cp /usr/share/openyellowos/os-release /usr/lib/
+
+
 
 # Make sure disabled live services are restored
 restore=/live/etc/init.d/live-restore-services
@@ -38,4 +89,4 @@ if [ -e "/etc/live/config/systemd" ]; then
     exit 0 
 fi
 
-exit 0
+exit 0:
