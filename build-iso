@@ -978,7 +978,7 @@ do_stage_4() {
     if gather_any remove \
         && do_part 11 "Remove some packages"; then
         gather_say remove "Remove $(pqn %n) package%s"
-        apt-get purge $(gather remove) $apt_yes
+        apt-get purge -y $(gather remove) $apt_yes
         end_part_lax
     fi
 
@@ -3555,7 +3555,7 @@ select_theme() {
     done
 
     [[ -n $themes ]] || return
-    yes_NO_loud "Do you want to set a theme" || return
+    YES_no_loud "Do you want to set a theme" || return
     choose "Select a theme" THEME $themes
 }
 
