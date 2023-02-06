@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/bin/canberra-gtk-play --file="/usr/share/openyellowos/login-sound.ogg" --description="Login sound"
+Comment=Login sound
