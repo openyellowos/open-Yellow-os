@@ -13,7 +13,7 @@ CODE_NAME="dandelion"
 ASCII_CODE_NAME="dandelion"
 DEBIAN_RELEASE="bullseye"
 DISTRO_NAME="open.Yellow.os"
-DISTRO_VERSION="23.02-beta5.3"
+DISTRO_VERSION="23.02-rc1"
 HOME_URL="https://openyellowos.com/"
 
 #Kernel templates...comment and uncomment depending on what you are building
@@ -34,7 +34,7 @@ LIVE_USER="demo"
 LOCALE="ja_JP.UTF-8"
 MIRROR="jp"
 NEW_HOSTNAME="oYo"
-RELEASE_DATE="February 10, 2023"
+RELEASE_DATE="February 12, 2023"
 TIME_ZONE="Asia/Tokyo"
 
 #DE particular items
