@@ -1287,6 +1287,10 @@ do_stage_4() {
      #----------------------------
      #コマンド実行
      #----------------------------
+     #ライブ起動時、ロックスクリーンを無効化することでDEMOユーザーのパスワード入力を不要にする
+    gsettings set org.gnome.desktop.lockdown disable-lock-screen true
+     #入力ソースを日本語に設定
+    #gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'jp')]"
     #flathubリポジトリを追加
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     #Popsicleをflathubからインストール
