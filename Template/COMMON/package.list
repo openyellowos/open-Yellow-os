@@ -27,6 +27,8 @@ dracut
 eject
 expect
 evince
+fcitx5
+fcitx5-mozc
 file-roller
 firefox-esr
 firefox-esr-l10n-ja
@@ -52,6 +54,7 @@ firmware-qlogic
 firmware-realtek
 firmware-samsung
 firmware-siano
+firmware-sof-signed
 firmware-ti-connectivity
 flatpak
 fonts-cantarell
@@ -97,6 +100,7 @@ gnome-session
 gnome-session-canberra 
 gnome-settings-daemon
 gnome-shell
+gnome-shell-extension-kimpanel
 gnome-shell-extensions
 gnome-software
 gnome-software-plugin-flatpak
@@ -121,8 +125,6 @@ gvfs-backends
 gvfs-fuse
 #htop
 hwinfo
-ibus
-ibus-mozc
 ifupdown
 init
 #inkscape
@@ -166,6 +168,8 @@ poppler-data
 pulseaudio
 pulseaudio-module-bluetooth
 python3
+qml-module-qtquick2
+qml-module-qtquick-window2
 resolvconf
 #rhythmbox
 rsync
