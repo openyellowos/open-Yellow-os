@@ -22,8 +22,8 @@ images:
     productWelcome:      "welcome.png"
     # productWallpaper:  "wallpaper.png"
 
-#slideshow:               "show.qml"
-slideshow: ["slide01.jpg","slide02.jpg","slide03.jpg","slide04.jpg","slide05.jpg","slide06.jpg","slide07.jpg","slide08.jpg"]
+slideshow:               "show.qml"
+#slideshow: ["slide01.jpg","slide02.jpg","slide03.jpg","slide04.jpg","slide05.jpg","slide06.jpg","slide07.jpg","slide08.jpg"]
 
 style:
    sidebarBackground:    "#2c3133"
@@ -31,4 +31,4 @@ style:
    sidebarTextSelect:    "#4d7079"
    sidebarTextSelect:    "#292F34"
 
-slideshowAPI: 2
+slideshowAPI: 1
