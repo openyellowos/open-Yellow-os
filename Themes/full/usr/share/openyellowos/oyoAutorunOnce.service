@@ -1,0 +1,13 @@
+[Unit]
+Description=open.Yellow.os service
+After=network.target
+
+[Service]
+ExecStart=/bin/bash -c "/usr/share/openyellowos/oyoAutorunOnce.sh \
+        && /usr/bin/systemctl disable oyoAutorunOnce.service"
+ExecStop=/bin/kill ${MAINPID}
+Restart=no
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

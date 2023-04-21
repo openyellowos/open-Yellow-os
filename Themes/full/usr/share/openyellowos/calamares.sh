@@ -6,6 +6,10 @@ rm -f /etc/polkit-1/localauthority/50-local.d/47-allow-live-user.pkla
 # remove nopassword
 rm -f /etc/sudoers.d/wheel
 
+# oyo用の自動実行サービス(1回限り）のファイルを配置
+cp /usr/share/openyellowos/oyoAutorunOnce.service /etc/systemd/system/oyoAutorunOnce.service
+systemctl enable oyoAutorunOnce.service
+
 # ライブ起動時のロックスクリーンの無効化を、元に戻す
 gsettings set org.gnome.desktop.lockdown disable-lock-screen false
 
