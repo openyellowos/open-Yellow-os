@@ -26,7 +26,7 @@ HOME_URL="https://openyellowos.com/"
 #standard 64 bit
 K_REVISION="*"
 K_TEMPLATE="%V-%A"
-K_VERSION="5.10.0-21"
+K_VERSION="5.10.0-22"
 UNSIGNED=""
 
 #system defaults, these end up inside the squash file system mostly
@@ -36,6 +36,12 @@ MIRROR="jp"
 NEW_HOSTNAME="oYo"
 RELEASE_DATE="April 29, 2023"
 TIME_ZONE="Asia/Tokyo"
+ENABLE_LOCALES="Default"
+CURSOR_ICON_THEME="/usr/share/icons/Adwaita/cursor.theme"
+X_TERM_EMULATOR="/usr/bin/gnome-terminal.wrapper"
+ARCH="amd64"
+ISO_FLAV="full"
+THEME="full"
 
 #DE particular items
 #X_TERM_EMULATOR="/usr/bin/xfce4-terminal.wrapper"
