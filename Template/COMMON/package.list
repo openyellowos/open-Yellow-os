@@ -23,7 +23,7 @@ curl
 dbus
 dconf-cli
 dconf-gsettings-backend
-dracut
+#dracut
 eject
 expect
 evince
@@ -189,6 +189,7 @@ systemd-timesyncd
 task-laptop
 task-japanese
 tasksel
+timeshift
 tracker
 ufw
 usbutils
