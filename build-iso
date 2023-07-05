@@ -1308,6 +1308,9 @@ do_stage_4() {
     ln -fs /usr/share/icons/gnome/48x48/places/oyo-logo-48.png /etc/alternatives/start-here-48.png
     ln -fs /usr/share/icons/gnome/256x256/places/oyo-logo-256.png /etc/alternatives/start-here-256.png
     ln -fs /usr/share/icons/gnome/scalable/places/oyo-logo.svg /etc/alternatives/start-here.svg
+     #ユーザーのアイコンを削除
+    rm /etc/skel/.face
+    rm /etc/skel/.face.icon
      #不要なパッケージを削除
     apt -y autoremove
      #システムデータベースを更新
