@@ -28,24 +28,31 @@ const PrefsWindow = Me.imports.prefswindow;
 
 var _ = Gettext.domain('ding').gettext;
 
+/**
+ *
+ */
 function init() {}
 
+/**
+ *
+ */
 function buildPrefsWidget() {
-
     let schemaSource = GioSSS.get_default();
     let schemaGtk = schemaSource.lookup(Enums.SCHEMA_GTK, true);
-    let gtkSettings = new Gio.Settings({ settings_schema: schemaGtk });
+    let gtkSettings = new Gio.Settings({settings_schema: schemaGtk});
     let schemaObj = schemaSource.lookup(Enums.SCHEMA_NAUTILUS, true);
+    let nautilusSettings;
     if (!schemaObj) {
-        var nautilusSettings = null;
+        nautilusSettings = null;
     } else {
-        var nautilusSettings = new Gio.Settings({ settings_schema: schemaObj });;
+        nautilusSettings = new Gio.Settings({settings_schema: schemaObj});
     }
     let desktopSettings = PrefsWindow.get_schema(Me.dir.get_path(), Enums.SCHEMA);
 
     let localedir = Me.dir.get_child('locale');
-    if (localedir.query_exists(null))
+    if (localedir.query_exists(null)) {
         Gettext.bindtextdomain('ding', localedir.get_path());
+    }
 
     let frame = PrefsWindow.preferencesFrame(Gtk, desktopSettings, nautilusSettings, gtkSettings);
     if (frame.show_all) {

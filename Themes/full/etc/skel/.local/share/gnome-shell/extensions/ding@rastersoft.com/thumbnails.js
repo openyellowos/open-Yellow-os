@@ -21,7 +21,6 @@ const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
 var ThumbnailLoader = class {
-
     constructor(codePath) {
         this._timeoutValue = 5000;
         this._codePath = codePath;
@@ -32,10 +31,10 @@ var ThumbnailLoader = class {
         this._thumbnailFactoryLarge = GnomeDesktop.DesktopThumbnailFactory.new(GnomeDesktop.DesktopThumbnailSize.LARGE);
         if (this._thumbnailFactoryLarge.generate_thumbnail_async) {
             this._useAsyncAPI = true;
-            print("Detected async api for thumbnails");
+            print('Detected async api for thumbnails');
         } else {
             this._useAsyncAPI = false;
-            print("Failed to detected async api for thumbnails");
+            print('Failed to detected async api for thumbnails');
         }
     }
 
@@ -65,7 +64,7 @@ var ThumbnailLoader = class {
                     break;
                 }
             }
-        } while(true);
+        } while (true);
         this._running = true;
         if (this._useAsyncAPI) {
             this._createThumbnailAsync(file, callback);
@@ -89,7 +88,7 @@ var ThumbnailLoader = class {
                     }
                     this._launchNewBuild();
                 });
-            } catch(e) {
+            } catch (e) {
                 print(`Error while creating thumbnail: ${e.message}\n${e.stack}`);
                 this._createFailedThumbnailAsync(file, modifiedTime, callback);
             }
@@ -105,10 +104,10 @@ var ThumbnailLoader = class {
 
     _createFailedThumbnailAsync(file, modifiedTime, callback) {
         this._doCancel = new Gio.Cancellable();
-        this._thumbnailFactoryLarge.create_failed_thumbnail_async(file.uri, modifiedTime, this._doCancel, (obj,res) => {
+        this._thumbnailFactoryLarge.create_failed_thumbnail_async(file.uri, modifiedTime, this._doCancel, (obj, res) => {
             try {
                 obj.create_failed_thumbnail_finish(res);
-            } catch(e) {
+            } catch (e) {
                 print(`Error while creating failed thumbnail: ${e.message}\n${e.stack}`);
             }
             if (callback) {
@@ -138,7 +137,7 @@ var ThumbnailLoader = class {
                 } else {
                     print(`Failed to generate thumbnail for ${file.displayName}`);
                 }
-            } catch(error) {
+            } catch (error) {
                 print(`Exception when generating thumbnail for ${file.displayName}: ${error}`);
             }
             this._launchNewBuild();
@@ -167,13 +166,13 @@ var ThumbnailLoader = class {
                 if ((thumbnail == null) &&
                     !this._thumbnailFactoryLarge.has_valid_failed_thumbnail(file.uri, file.modifiedTime) &&
                      this._thumbnailFactoryLarge.can_thumbnail(file.uri, file.attributeContentType, file.modifiedTime)) {
-                        this._generateThumbnail(file, callback);
+                    this._generateThumbnail(file, callback);
                 }
             }
             return thumbnail;
-        } catch(error) {
+        } catch (error) {
             print(`Error when asking for a thumbnail for ${file.displayName}: ${error.message}\n${error.stack}`);
         }
         return null;
     }
-}
+};

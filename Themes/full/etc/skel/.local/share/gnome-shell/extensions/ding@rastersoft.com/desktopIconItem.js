@@ -18,8 +18,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+/* exported dropDestination */
 'use strict';
-const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const Gio = imports.gi.Gio;
@@ -31,7 +31,6 @@ const DesktopIconsUtil = imports.desktopIconsUtil;
 
 const Prefs = imports.preferences;
 const Enums = imports.enums;
-const DBusUtils = imports.dbusUtils;
 
 const ByteArray = imports.byteArray;
 const Signals = imports.signals;
@@ -40,7 +39,6 @@ const Gettext = imports.gettext.domain('ding');
 const _ = Gettext.gettext;
 
 var desktopIconItem = class desktopIconItem {
-
     constructor(desktopManager, fileExtra) {
         this._signalIds = [];
         this._desktopManager = desktopManager;
@@ -59,7 +57,7 @@ var desktopIconItem = class desktopIconItem {
         this._destroyed = false;
     }
 
-    /***********************
+    /** *********************
      * Destroyers *
      ***********************/
 
@@ -84,7 +82,7 @@ var desktopIconItem = class desktopIconItem {
             this._loadThumbnailDataCancellable.cancel();
         }
         /* Disconnect signals */
-        for(let [object, signalId] of this._signalIds) {
+        for (let [object, signalId] of this._signalIds) {
             object.disconnect(signalId);
         }
         this._signalIds = [];
@@ -110,7 +108,7 @@ var desktopIconItem = class desktopIconItem {
         this._signalIds.push([object, object.connect(signal, callback)]);
     }
 
-    /***********************
+    /** *********************
      * Creators *
      ***********************/
 
@@ -164,8 +162,12 @@ var desktopIconItem = class desktopIconItem {
          * The solution is to allow them to pass in a EventBox, used both for detecting the events and the DnD, and block them
          * in a second EventBox, located outside.
          */
-        this._connectSignal(this._shieldEventBox, 'button-press-event', (actor, event) => {return true;});
-        this._connectSignal(this._shieldLabelEventBox, 'button-press-event', (actor, event) => {return true;});
+        this._connectSignal(this._shieldEventBox, 'button-press-event', (actor, event) => {
+            return true;
+        });
+        this._connectSignal(this._shieldLabelEventBox, 'button-press-event', (actor, event) => {
+            return true;
+        });
         this._connectSignal(this._eventBox, 'button-press-event', (actor, event) => this._onPressButton(actor, event));
         this._connectSignal(this._eventBox, 'enter-notify-event', (actor, event) => this._onEnter(this._eventBox));
         this._connectSignal(this._eventBox, 'leave-notify-event', (actor, event) => this._onLeave(this._eventBox));
@@ -261,18 +263,18 @@ var desktopIconItem = class desktopIconItem {
         this._eventBox.set_tooltip_text(text);
         let lastCutPos = -1;
         let newText = '';
-        for (let pos=0; pos < text.length; pos++) {
+        for (let pos = 0; pos < text.length; pos++) {
             let character = text[pos];
             newText += character;
             if (pos < (text.length - 1)) {
-                var nextChar = text[pos+1]
+                var nextChar = text[pos + 1];
             } else {
                 var nextChar = '';
             }
             if (character == ' ') {
                 lastCutPos = pos;
             }
-            if (['.',',','-','_','@',':'].includes(character)) {
+            if (['.', ',', '-', '_', '@', ':'].includes(character)) {
                 /* if the next character is already an space or this is the last
                  * character, the string will be naturally cut here, so we do
                  * nothing.
@@ -292,7 +294,7 @@ var desktopIconItem = class desktopIconItem {
         this._label.label = newText;
     }
 
-    /***********************
+    /** *********************
      * Button Clicks *
      ***********************/
 
@@ -300,10 +302,11 @@ var desktopIconItem = class desktopIconItem {
         let settings = Gtk.Settings.get_default();
 
         if ((event.get_button()[1] == this._lastClickButton) &&
-            ((event.get_time() - this._lastClickTime) < settings.gtk_double_click_time))
+            ((event.get_time() - this._lastClickTime) < settings.gtk_double_click_time)) {
             this._clickCount++;
-        else
+        } else {
             this._clickCount = 1;
+        }
 
         this._lastClickTime = event.get_time();
         this._lastClickButton = event.get_button()[1];
@@ -359,7 +362,7 @@ var desktopIconItem = class desktopIconItem {
     _doButtonOneReleased(event) {
     }
 
-    /***********************
+    /** *********************
      * Drag and Drop *
      ***********************/
 
@@ -371,7 +374,7 @@ var desktopIconItem = class desktopIconItem {
         if (Prefs.CLICK_POLICY_SINGLE) {
             let window = element.get_window();
             if (window) {
-                window.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "hand"));
+                window.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), 'hand'));
             }
         }
         return false;
@@ -386,7 +389,7 @@ var desktopIconItem = class desktopIconItem {
         if (Prefs.CLICK_POLICY_SINGLE) {
             let window = element.get_window();
             if (window) {
-                window.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), "default"));
+                window.set_cursor(Gdk.Cursor.new_from_name(Gdk.Display.get_default(), 'default'));
             }
         }
         return false;
@@ -396,21 +399,23 @@ var desktopIconItem = class desktopIconItem {
         if (this._grid) {
             return true;
         }
+        return false;
     }
 
     _updateDragStatus(context, time) {
-        if (DesktopIconsUtil.getModifiersInDnD(context, Gdk.ModifierType.CONTROL_MASK))
+        if (DesktopIconsUtil.getModifiersInDnD(context, Gdk.ModifierType.CONTROL_MASK)) {
             Gdk.drag_status(context, Gdk.DragAction.COPY, time);
-        else
+        } else {
             Gdk.drag_status(context, Gdk.DragAction.MOVE, time);
+        }
     }
 
-    highLightDropTarget(x, y) {
+    highLightDropTarget() {
         if (this._hasToRouteDragToGrid()) {
             this._grid.receiveMotion(this._x1, this._y1, true);
             return;
         }
-        if (! this._styleContext.has_class('desktop-icons-selected')) {
+        if (!this._styleContext.has_class('desktop-icons-selected')) {
             this._styleContext.add_class('desktop-icons-selected');
             this._labelStyleContext.add_class('desktop-icons-selected');
         }
@@ -422,7 +427,7 @@ var desktopIconItem = class desktopIconItem {
             this._grid.receiveLeave();
             return;
         }
-        if (! this._isSelected && this._styleContext.has_class('desktop-icons-selected')) {
+        if (!this._isSelected && this._styleContext.has_class('desktop-icons-selected')) {
             this._styleContext.remove_class('desktop-icons-selected');
             this._labelStyleContext.remove_class('desktop-icons-selected');
         }
@@ -463,71 +468,80 @@ var desktopIconItem = class desktopIconItem {
         if ((this._fileExtra != Enums.FileType.USER_DIRECTORY_TRASH) &&
             (this._fileExtra != Enums.FileType.USER_DIRECTORY_HOME) &&
             (this._fileExtra != Enums.FileType.EXTERNAL_DRIVE)) {
-                targets.add(Gdk.atom_intern('x-special/gnome-icon-list', false), 0,
-                    Enums.DndTargetInfo.GNOME_ICON_LIST);
-                targets.add(Gdk.atom_intern('text/uri-list', false), 0,
-                    Enums.DndTargetInfo.URI_LIST);
+            targets.add(Gdk.atom_intern('x-special/gnome-icon-list', false), 0,
+                Enums.DndTargetInfo.GNOME_ICON_LIST);
+            targets.add(Gdk.atom_intern('text/uri-list', false), 0,
+                Enums.DndTargetInfo.URI_LIST);
         }
         widget.drag_source_set_target_list(targets);
         targets = undefined; // prevent memory leaks
-        this._connectSignal(widget, 'drag-begin', (widget, context) => {
+        this._connectSignal(widget, 'drag-begin', (w, context) => {
             const scale = this._icon.get_scale_factor();
             let surf = new Cairo.ImageSurface(Cairo.SurfaceType.IMAGE, this.container.get_allocated_width() * scale, this.container.get_allocated_height() * scale);
             // setDeviceScale was introduced to GJS in version 1.69.2
-            if (scale != 1.0 && surf.setDeviceScale !== undefined)
+            if (scale != 1.0 && surf.setDeviceScale !== undefined) {
                 surf.setDeviceScale(scale, scale);
+            }
             let cr = new Cairo.Context(surf);
             this.container.draw(cr);
             let itemnumber = this._desktopManager.getNumberOfSelectedItems();
             if (itemnumber > 1) {
-                Gdk.cairo_set_source_rgba(cr, new Gdk.RGBA({red: this._desktopManager.selectColor.red,
-                                                            green: this._desktopManager.selectColor.green,
-                                                            blue: this._desktopManager.selectColor.blue,
-                                                            alpha: 0.6})
+                Gdk.cairo_set_source_rgba(cr, new Gdk.RGBA({
+                    red: this._desktopManager.selectColor.red,
+                    green: this._desktopManager.selectColor.green,
+                    blue: this._desktopManager.selectColor.blue,
+                    alpha: 0.6,
+                })
                 );
                 itemnumber -= 1;
                 switch (itemnumber.toString().length) {
-                    case 1: cr.rectangle(1, 1, 30, 20); break;
-                    case 2: cr.rectangle(1, 1, 40, 20); break;
-                    default: cr.rectangle(1, 1, 50, 20); break;
+                case 1:
+                    cr.rectangle(1, 1, 30, 20);
+                    break;
+                case 2:
+                    cr.rectangle(1, 1, 40, 20);
+                    break;
+                default:
+                    cr.rectangle(1, 1, 50, 20);
+                    break;
                 }
                 cr.fill();
                 cr.setFontSize(18);
-                Gdk.cairo_set_source_rgba(cr, new Gdk.RGBA({red: 1.0, green: 1.0 , blue: 1.0, alpha: 1}));
-                cr.moveTo(1,17);
-                cr.showText(`+${itemnumber}`)
+                Gdk.cairo_set_source_rgba(cr, new Gdk.RGBA({red: 1.0, green: 1.0, blue: 1.0, alpha: 1}));
+                cr.moveTo(1, 17);
+                cr.showText(`+${itemnumber}`);
             }
             Gtk.drag_set_icon_surface(context, surf);
             let [x, y] = this._calculateOffset(widget);
-            context.set_hotspot(x,y);
+            context.set_hotspot(x, y);
             this._desktopManager.onDragBegin(this);
             cr.$dispose();
         });
-        this._connectSignal(widget, 'drag-data-get', (widget, context, data, info, time) => {
+        this._connectSignal(widget, 'drag-data-get', (w, context, data, info, time) => {
             let dragData = this._desktopManager.fillDragDataGet(info);
             if (dragData != null) {
                 let list = ByteArray.fromString(dragData[1]);
                 data.set(dragData[0], 8, list);
             }
         });
-        this._connectSignal(widget, 'drag-end', (widget, context) => {
+        this._connectSignal(widget, 'drag-end', (w, context) => {
             this._desktopManager.onDragEnd();
-        })
+        });
     }
 
     _calculateOffset(widget) {
         if (widget == this._eventBox) {
-            return [((this.width - this.iconwidth)/2) + this._buttonPressInitialX, this._buttonPressInitialY];
+            return [((this.width - this.iconwidth) / 2) + this._buttonPressInitialX, this._buttonPressInitialY];
         } else {
-            return [((this.width - this.labelwidth)/2) + this._buttonPressInitialX, (this.iconheight + 2) + this._buttonPressInitialY];
+            return [((this.width - this.labelwidth) / 2) + this._buttonPressInitialX, (this.iconheight + 2) + this._buttonPressInitialY];
         }
     }
 
     _setDropDestination(dropDestination) {
-        return;
+
     }
 
-    /***********************
+    /** *********************
      * Icon Rendering *
      ***********************/
 
@@ -540,7 +554,7 @@ var desktopIconItem = class desktopIconItem {
             return;
         }
 
-        this._icon.set_padding(0,0);
+        this._icon.set_padding(0, 0);
         try {
             let customIcon = this._fileInfo.get_attribute_as_string('metadata::custom-icon');
             if (customIcon && (customIcon != '')) {
@@ -563,28 +577,26 @@ var desktopIconItem = class desktopIconItem {
             this._icon.set_from_surface(surface);
             return;
         }
-        let icon_set = false;
+        let iconSet = false;
         if (Prefs.nautilusSettings.get_string('show-image-thumbnails') != 'never') {
             let thumbnail = this._desktopManager.thumbnailLoader.getThumbnail(this, this._updateIcon.bind(this));
             if (thumbnail != null) {
                 let thumbnailFile = Gio.File.new_for_path(thumbnail);
-                icon_set = await this._loadImageAsIcon(thumbnailFile);
+                iconSet = await this._loadImageAsIcon(thumbnailFile);
                 if (this._destroyed) {
                     return;
                 }
             }
         }
 
-        if (!icon_set) {
+        if (!iconSet) {
             let pixbuf;
             if (this._isBrokenSymlink) {
                 pixbuf = this._createEmblemedIcon(null, 'text-x-generic');
+            } else if (this._desktopFile && this._desktopFile.has_key('Icon')) {
+                pixbuf = this._createEmblemedIcon(null, this._desktopFile.get_string('Icon'));
             } else {
-                if (this._desktopFile && this._desktopFile.has_key('Icon')) {
-                    pixbuf = this._createEmblemedIcon(null, this._desktopFile.get_string('Icon'));
-                } else {
-                    pixbuf = this._createEmblemedIcon(this._getDefaultIcon(), null);
-                }
+                pixbuf = this._createEmblemedIcon(this._getDefaultIcon(), null);
             }
             const scale = this._icon.get_scale_factor();
             let surface = Gdk.cairo_surface_create_from_pixbuf(pixbuf, scale, null);
@@ -600,16 +612,16 @@ var desktopIconItem = class desktopIconItem {
     }
 
     _loadImageAsIcon(imageFile) {
-
-        if (this._loadThumbnailDataCancellable)
+        if (this._loadThumbnailDataCancellable) {
             this._loadThumbnailDataCancellable.cancel();
+        }
         this._loadThumbnailDataCancellable = new Gio.Cancellable();
 
-        return new Promise( (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             imageFile.load_bytes_async(this._loadThumbnailDataCancellable, (source, result) => {
                 this._loadThumbnailDataCancellable = null;
                 try {
-                    let [thumbnailData, etag_out] = source.load_bytes_finish(result);
+                    let [thumbnailData, etagOut] = source.load_bytes_finish(result);
                     let thumbnailStream = Gio.MemoryInputStream.new_from_bytes(thumbnailData);
                     let thumbnailPixbuf = GdkPixbuf.Pixbuf.new_from_stream(thumbnailStream, null);
 
@@ -617,10 +629,11 @@ var desktopIconItem = class desktopIconItem {
                         let width = Prefs.get_desired_width() - 8;
                         let height = Prefs.get_icon_size() - 8;
                         let aspectRatio = thumbnailPixbuf.width / thumbnailPixbuf.height;
-                        if ((width / height) > aspectRatio)
+                        if ((width / height) > aspectRatio) {
                             width = height * aspectRatio;
-                        else
+                        } else {
                             height = width / aspectRatio;
+                        }
                         const scale = this._icon.get_scale_factor();
                         width *= scale;
                         height *= scale;
@@ -628,11 +641,11 @@ var desktopIconItem = class desktopIconItem {
                         pixbuf = this._addEmblemsToPixbufIfNeeded(pixbuf);
                         let surface = Gdk.cairo_surface_create_from_pixbuf(pixbuf, scale, null);
                         this._icon.set_from_surface(surface);
-                        this._icon.set_padding(4,4)
+                        this._icon.set_padding(4, 4);
                         resolve(true);
                     }
                     resolve(false);
-                } catch(e) {
+                } catch (e) {
                     resolve(false);
                 }
             });
@@ -654,8 +667,8 @@ var desktopIconItem = class desktopIconItem {
         this._copiedPixbuf = true;
         let minsize = Prefs.get_icon_size();
         if ((pixbuf.width < minsize) || (pixbuf.height < minsize)) {
-            let width = (pixbuf.width < minsize) ? minsize : pixbuf.width;
-            let height = (pixbuf.height < minsize) ? minsize : pixbuf.height;
+            let width = pixbuf.width < minsize ? minsize : pixbuf.width;
+            let height = pixbuf.height < minsize ? minsize : pixbuf.height;
             let newpixbuf = GdkPixbuf.Pixbuf.new(pixbuf.colorspace, true, pixbuf.bits_per_sample, width, height);
             newpixbuf.fill(0);
             let x = Math.floor((width - pixbuf.width) / 2);
@@ -673,7 +686,7 @@ var desktopIconItem = class desktopIconItem {
         let emblem = null;
         let finalSize = Math.floor(Prefs.get_icon_size() / 3) * scale;
 
-        if (this._isDesktopFile && ((! this._isValidDesktopFile) || (! this.trustedDesktopFile))) {
+        if (this._isDesktopFile && (!this._isValidDesktopFile || !this.trustedDesktopFile)) {
             pixbuf = this._copyAndResizeIfNeeded(pixbuf);
             pixbuf.saturate_and_pixelate(pixbuf, 0.5, true);
             emblem = Gio.ThemedIcon.new('emblem-unreadable');
@@ -684,17 +697,18 @@ var desktopIconItem = class desktopIconItem {
         }
 
         if (this._isSymlink && (this._desktopManager.showLinkEmblem || this._isBrokenSymlink)) {
-            if (this._isBrokenSymlink)
+            if (this._isBrokenSymlink) {
                 emblem = Gio.ThemedIcon.new('emblem-unreadable');
-            else
+            } else {
                 emblem = Gio.ThemedIcon.new('emblem-symbolic-link');
+            }
             pixbuf = this._copyAndResizeIfNeeded(pixbuf);
             let theme = Gtk.IconTheme.get_default();
             let emblemIcon = theme.lookup_by_gicon_for_scale(emblem, finalSize / scale, scale, Gtk.IconLookupFlags.FORCE_SIZE).load_icon();
             emblemIcon.composite(pixbuf, pixbuf.width - finalSize, pixbuf.height - finalSize, finalSize, finalSize, pixbuf.width - finalSize, pixbuf.height - finalSize, 1, 1, GdkPixbuf.InterpType.BILINEAR, 255);
         }
 
-        if (this.isStackTop && ! this.stackUnique) {
+        if (this.isStackTop && !this.stackUnique) {
             pixbuf = this._copyAndResizeIfNeeded(pixbuf);
             let theme = Gtk.IconTheme.get_default();
             emblem = Gio.ThemedIcon.new('emblem-downloads');
@@ -709,8 +723,8 @@ var desktopIconItem = class desktopIconItem {
             if (GLib.path_is_absolute(iconName)) {
                 try {
                     let iconFile = Gio.File.new_for_commandline_arg(iconName);
-                    icon = new Gio.FileIcon({ file: iconFile });
-                } catch(e) {
+                    icon = new Gio.FileIcon({file: iconFile});
+                } catch (e) {
                     icon = Gio.ThemedIcon.new_with_default_fallbacks(iconName);
                 }
             } else {
@@ -724,7 +738,7 @@ var desktopIconItem = class desktopIconItem {
         try {
             itemIcon = theme.lookup_by_gicon_for_scale(icon, Prefs.get_icon_size(), scale, Gtk.IconLookupFlags.FORCE_SIZE).load_icon();
         } catch (e) {
-            itemIcon = theme.load_icon_for_scale("text-x-generic", Prefs.get_icon_size(), scale, Gtk.IconLookupFlags.FORCE_SIZE);
+            itemIcon = theme.load_icon_for_scale('text-x-generic', Prefs.get_icon_size(), scale, Gtk.IconLookupFlags.FORCE_SIZE);
         }
 
         itemIcon = this._addEmblemsToPixbufIfNeeded(itemIcon);
@@ -732,7 +746,7 @@ var desktopIconItem = class desktopIconItem {
         return itemIcon;
     }
 
-    /***********************
+    /** *********************
      * Getters and setters *
      ***********************/
 
@@ -741,8 +755,9 @@ var desktopIconItem = class desktopIconItem {
     }
 
     set state(state) {
-        if (state == this._state)
+        if (state == this._state) {
             return;
+        }
 
         this._state = state;
     }
@@ -766,5 +781,5 @@ var desktopIconItem = class desktopIconItem {
     set dropCoordinates(pos) {
         this._dropCoordinates = pos;
     }
-}
+};
 Signals.addSignalMethods(desktopIconItem.prototype);

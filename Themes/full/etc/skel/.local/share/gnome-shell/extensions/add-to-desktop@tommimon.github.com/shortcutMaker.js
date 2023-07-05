@@ -1,7 +1,6 @@
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
+const { Gio, GLib, St, GObject } = imports.gi;
 const AppDisplay = imports.ui.appDisplay;
 const PopupMenu = imports.ui.popupMenu;
 const Gettext = imports.gettext;
@@ -16,52 +15,49 @@ function _(stringIn) {
 	return Gettext.dgettext('add-to-desktop', stringIn)
 }
 
-// override the context menu rebuild method to add the new item
-function editMenuClass(parentMenu) {
-    AppDisplay.AppIconMenu = class CustomMenu extends parentMenu {
-        // for shell version 3.35 or earlier
-        _redisplay() {
-            super._redisplay();
-            insertAddToDesktopButton(this);
+// edit the icon popupMenu method to add the new item
+function editIconClass(oldPopupMenu) {
+    AppDisplay.AppIcon.prototype._preAddToDesktopPopupMenu = oldPopupMenu;
+    AppDisplay.AppIcon.prototype.popupMenu = function(side = St.Side.LEFT) {
+        let firstCall = !this._menu;  // if _menu is not defined is the first call to this function
+        let res =  this._preAddToDesktopPopupMenu(side);
+        if (firstCall) {
+            insertAddToDesktopButton(this._menu);
         }
-
-        // for shell version 3.36 or later
-        _rebuildMenu() {
-            super._rebuildMenu();
-            insertAddToDesktopButton(this);
-        }
-    }
+        return res;
+    };
 }
 
 function insertAddToDesktopButton(menu) {
-    // look for both english and translated
-    let nameArray = ['Add to Favorites', 'Remove from Favorites', shell_gettext('Add to Favorites'), shell_gettext('Remove from Favorites')]
+    let nameArray = ['Add to Favorites', 'Remove from Favorites', 'Pin to Dash', 'Unpin'];
+    nameArray.forEach(name => {
+        nameArray.push(shell_gettext(name));  // look for both english and translated
+    });
     let itemsArray = menu._getMenuItems();
     let pos = -1;
-    for(let i = itemsArray.length-1; i >= 0; i--) {
+    for (let i = itemsArray.length-1; i >= 0; i--) {
         let item = itemsArray[i];
         // check class because there are also separators or other things
-        if(item instanceof PopupMenu.PopupMenuItem) {
+        if (item instanceof PopupMenu.PopupMenuItem) {
             let label = item.label.get_text();
-            if(nameArray.includes(label)) {
+            if (nameArray.includes(label)) {
                 pos = i;
             }
         }
     }
 
     let label = _('Add to Desktop');
-    let item;
-    if(pos === -1) {
-        menu._appendSeparator();
-        item = menu._appendMenuItem(label); // add at the end
+    item = new PopupMenu.PopupMenuItem(label);
+    if (pos === -1) {
+        menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        menu.addMenuItem(item); // add at the end
     }
     else {
-        item = new PopupMenu.PopupMenuItem(label);
         menu.addMenuItem(item, pos+1); // insert at specific position
     }
 
     item.connect('activate', () => {
-        let appPath = menu._source.app.get_app_info().get_filename(); // get the .desktop file complete path
+        let appPath = menu._app.get_app_info().get_filename(); // get the .desktop file complete path
         let shortcutMaker = new ShortcutMaker();
         shortcutMaker.makeShortcut(appPath);
     });
@@ -122,7 +118,6 @@ var ShortcutMaker = class ShortcutMaker {
                     log(`Failed to allow launching: ${e.message}`);
                 }
             });
-        //TODO: metadata::shortcut-of
     }
 
     // set executable bit last because this call refresh in desktop icon extension

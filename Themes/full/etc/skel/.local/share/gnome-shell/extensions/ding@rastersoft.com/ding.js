@@ -30,34 +30,42 @@ let errorFound = false;
 let asDesktop = false;
 let primaryIndex = 0;
 
-function print_usage() {
-    print("Desktop Icons NG");
-    print("Usage:");
-    print("  -h                      : show this help");
-    print("  -E                      : run as desktop (with transparent window, reading data from the extension...)");
-    print("  -P code path            : set the path where the code is stored");
-    print("  -M index                : index of the primary monitor");
-    print("  -D x:y:w:h:z:t:b:l:r:i  : monitor data");
-    print("      x: X coordinate");
-    print("      y: Y coordinate");
-    print("      w: width in pixels");
-    print("      h: height in pixels");
-    print("      z: zoom value (must be greater than or equal to one)");
-    print("      t: top margin in pixels");
-    print("      b: bottom margin in pixels");
-    print("      l: left margin in pixels");
-    print("      r: right margin in pixels");
-    print("      i: monitor index (0, 1...)");
+/**
+ *
+ */
+function printUsage() {
+    print('Desktop Icons NG');
+    print('Usage:');
+    print('  -h                      : show this help');
+    print('  -E                      : run as desktop (with transparent window, reading data from the extension...)');
+    print('  -P code path            : set the path where the code is stored');
+    print('  -M index                : index of the primary monitor');
+    print('  -D x:y:w:h:z:t:b:l:r:i  : monitor data');
+    print('      x: X coordinate');
+    print('      y: Y coordinate');
+    print('      w: width in pixels');
+    print('      h: height in pixels');
+    print('      z: zoom value (must be greater than or equal to one)');
+    print('      t: top margin in pixels');
+    print('      b: bottom margin in pixels');
+    print('      l: left margin in pixels');
+    print('      r: right margin in pixels');
+    print('      i: monitor index (0, 1...)');
 }
 
+/**
+ *
+ * @param argv
+ */
 function parseCommandLine(argv) {
     desktops = [];
-    for(let arg of argv) {
+    let data;
+    for (let arg of argv) {
         if (lastCommand == null) {
-            switch(arg) {
+            switch (arg) {
             case '-h':
             case '-H':
-                print_usage();
+                printUsage();
                 errorFound = true;
                 break;
             case '-E':
@@ -79,35 +87,35 @@ function parseCommandLine(argv) {
         if (errorFound) {
             break;
         }
-        switch(lastCommand) {
+        switch (lastCommand) {
         case '-P':
             codePath = arg;
             break;
         case '-D':
-            let data = arg.split(":");
+            data = arg.split(':');
             if (data.length != 10) {
-                print("Incorrect number of parameters for -D\n");
-                print_usage();
+                print('Incorrect number of parameters for -D\n');
+                printUsage();
                 errorFound = true;
                 break;
             }
             if (parseFloat(data[4]) < 1.0) {
                 print("Error: ZOOM value can't be less than one\n");
-                print_usage();
+                printUsage();
                 errorFound = true;
                 break;
             }
             desktops.push({
-                x:parseInt(data[0]),
-                y:parseInt(data[1]),
-                width:parseInt(data[2]),
-                height:parseInt(data[3]),
-                zoom:parseFloat(data[4]),
-                marginTop:parseInt(data[5]),
-                marginBottom:parseInt(data[6]),
-                marginLeft:parseInt(data[7]),
-                marginRight:parseInt(data[8]),
-                monitorIndex:parseInt(data[9])
+                x: parseInt(data[0]),
+                y: parseInt(data[1]),
+                width: parseInt(data[2]),
+                height: parseInt(data[3]),
+                zoom: parseFloat(data[4]),
+                marginTop: parseInt(data[5]),
+                marginBottom: parseInt(data[6]),
+                marginLeft: parseInt(data[7]),
+                marginRight: parseInt(data[8]),
+                monitorIndex: parseInt(data[9]),
             });
             break;
         case '-M':
@@ -120,9 +128,9 @@ function parseCommandLine(argv) {
         /* if no desktop list is provided, like when launching the program in stand-alone mode,
          * configure a 1280x720 desktop
          */
-        desktops.push({x:0, y:0, width: 1280, height: 720, zoom: 1, marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0, monitorIndex: 0});
+        desktops.push({x: 0, y: 0, width: 1280, height: 720, zoom: 1, marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0, monitorIndex: 0});
     }
-    for(let desktop of desktops) {
+    for (let desktop of desktops) {
         desktop.primaryMonitor = primaryIndex;
     }
 }
@@ -138,17 +146,17 @@ const Prefs = imports.preferences;
 const Gettext = imports.gettext;
 const PromiseUtils = imports.promiseUtils;
 
-PromiseUtils._promisify({ keepOriginal: true }, Gio.FileEnumerator.prototype, 'close_async');
-PromiseUtils._promisify({ keepOriginal: true }, Gio.FileEnumerator.prototype, 'next_files_async');
-PromiseUtils._promisify({ keepOriginal: true }, Gio._LocalFilePrototype, 'delete_async');
-PromiseUtils._promisify({ keepOriginal: true }, Gio._LocalFilePrototype, 'enumerate_children_async');
-PromiseUtils._promisify({ keepOriginal: true }, Gio._LocalFilePrototype, 'make_directory_async');
-PromiseUtils._promisify({ keepOriginal: true }, Gio._LocalFilePrototype, 'query_info_async');
-PromiseUtils._promisify({ keepOriginal: true }, Gio._LocalFilePrototype, 'set_attributes_async');
+PromiseUtils._promisify({keepOriginal: true}, Gio.FileEnumerator.prototype, 'close_async');
+PromiseUtils._promisify({keepOriginal: true}, Gio.FileEnumerator.prototype, 'next_files_async');
+PromiseUtils._promisify({keepOriginal: true}, Gio._LocalFilePrototype, 'delete_async');
+PromiseUtils._promisify({keepOriginal: true}, Gio._LocalFilePrototype, 'enumerate_children_async');
+PromiseUtils._promisify({keepOriginal: true}, Gio._LocalFilePrototype, 'make_directory_async');
+PromiseUtils._promisify({keepOriginal: true}, Gio._LocalFilePrototype, 'query_info_async');
+PromiseUtils._promisify({keepOriginal: true}, Gio._LocalFilePrototype, 'set_attributes_async');
 
-let localePath = GLib.build_filenamev([codePath, "locale"]);
+let localePath = GLib.build_filenamev([codePath, 'locale']);
 if (Gio.File.new_for_path(localePath).query_exists(null)) {
-    Gettext.bindtextdomain("ding", localePath);
+    Gettext.bindtextdomain('ding', localePath);
 }
 
 const DesktopManager = imports.desktopManager;
@@ -157,8 +165,10 @@ var desktopManager = null;
 var dbusManager = null;
 
 // Use different AppIDs to allow to test it from a command line while the main desktop is also running from the extension
-const dingApp = new Gtk.Application({application_id: asDesktop ? 'com.rastersoft.ding' : 'com.rastersoft.dingtest',
-                                     flags: Gio.ApplicationFlags.HANDLES_COMMAND_LINE | Gio.ApplicationFlags.REPLACE});
+const dingApp = new Gtk.Application({
+    application_id: asDesktop ? 'com.rastersoft.ding' : 'com.rastersoft.dingtest',
+    flags: Gio.ApplicationFlags.HANDLES_COMMAND_LINE | Gio.ApplicationFlags.REPLACE,
+});
 
 dingApp.connect('startup', () => {
     Prefs.init(codePath);
@@ -168,19 +178,19 @@ dingApp.connect('startup', () => {
 dingApp.connect('activate', () => {
     if (!desktopManager) {
         desktopManager = new DesktopManager.DesktopManager(dingApp,
-                                                           dbusManager,
-                                                           desktops,
-                                                           codePath,
-                                                           asDesktop,
-                                                           primaryIndex);
+            dbusManager,
+            desktops,
+            codePath,
+            asDesktop,
+            primaryIndex);
     }
 });
 
 dingApp.connect('command-line', (app, commandLine) => {
-    let argv =[];
+    let argv = [];
     argv = commandLine.get_arguments();
     parseCommandLine(argv);
-    if (! errorFound) {
+    if (!errorFound) {
         if (commandLine.get_is_remote()) {
             desktopManager.updateGridWindows(desktops);
         } else {

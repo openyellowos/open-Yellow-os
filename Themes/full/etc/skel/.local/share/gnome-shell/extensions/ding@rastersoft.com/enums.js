@@ -16,27 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 'use strict';
-var ICON_SIZE = { 'tiny': 36, 'small': 48, 'standard': 64, 'large': 96 };
-var ICON_WIDTH = { 'tiny': 70, 'small': 90, 'standard': 120, 'large': 130 };
-var ICON_HEIGHT = { 'tiny': 80, 'small': 90, 'standard': 106, 'large': 138 };
+var ICON_SIZE = {'tiny': 36, 'small': 48, 'standard': 64, 'large': 96};
+var ICON_WIDTH = {'tiny': 70, 'small': 90, 'standard': 120, 'large': 130};
+var ICON_HEIGHT = {'tiny': 80, 'small': 90, 'standard': 106, 'large': 138};
 
-var START_CORNER = { 'top-left':     [false, false],
-                     'top-right':    [true, false],
-                     'bottom-left':  [false, true],
-                     'bottom-right': [true, true]};
+var START_CORNER = {
+    'top-left': [false, false],
+    'top-right': [true, false],
+    'bottom-left': [false, true],
+    'bottom-right': [true, true],
+};
 
 var FileType = {
     NONE: null,
     USER_DIRECTORY_HOME: 'show-home',
     USER_DIRECTORY_TRASH: 'show-trash',
     EXTERNAL_DRIVE: 'external-drive',
-    STACK_TOP: 'stack-top'
-}
+    STACK_TOP: 'stack-top',
+};
 
 var StoredCoordinates = {
     PRESERVE: 0,
-    OVERWRITE:1,
-    ASSIGN:2,
+    OVERWRITE: 1,
+    ASSIGN: 2,
 };
 
 var Selection = {
@@ -45,7 +47,7 @@ var Selection = {
     RIGHT_BUTTON: 2,
     ENTER: 3,
     LEAVE: 4,
-    RELEASE: 5
+    RELEASE: 5,
 };
 
 /* From NautilusFileUndoManagerState */
@@ -59,14 +61,14 @@ var FileExistOperation = {
     ASK: 0,
     OVERWRITE: 1,
     RENAME: 2,
-    SKIP: 3
+    SKIP: 3,
 };
 
 var WhatToDoWithExecutable = {
     EXECUTE: 0,
     EXECUTE_IN_TERMINAL: 1,
     DISPLAY: 2,
-    CANCEL: 3
+    CANCEL: 3,
 };
 
 var SortOrder = {
@@ -75,14 +77,14 @@ var SortOrder = {
     DESCENDINGNAME: 'descendingname',
     MODIFIEDTIME: 'modifiedtime',
     KIND: 'kind',
-    SIZE: 'size'
+    SIZE: 'size',
 };
 
 var CompressionType = {
     ZIP: 0,
     TAR_XZ: 1,
     SEVEN_ZIP: 2,
-    ENCRYPTED_ZIP: 3
+    ENCRYPTED_ZIP: 3,
 };
 
 var DndTargetInfo = {
@@ -101,6 +103,7 @@ var SCHEMA = 'org.gnome.shell.extensions.ding';
 var SCHEMA_MUTTER = 'org.gnome.mutter';
 var EXEC_KEY = 'exec';
 var NAUTILUS_SCRIPTS_DIR = '.local/share/nautilus/scripts';
+var SCHEMA_DARK_SETTINGS = 'org.gnome.desktop.interface';
 
 var S_IXUSR = 0o00100;
 var S_IWOTH = 0o00002;

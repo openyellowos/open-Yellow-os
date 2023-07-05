@@ -21,13 +21,12 @@ const Gtk = imports.gi.Gtk;
 var GnomeAutoar = null;
 try {
     GnomeAutoar = imports.gi.GnomeAutoar;
-} catch(e) {
+} catch (e) {
 }
 
 const Enums = imports.enums;
 const FileUtils = imports.fileUtils;
 const Prefs = imports.preferences;
-const DBusUtils = imports.dbusUtils;
 const Signals = imports.signals;
 
 const Gettext = imports.gettext.domain('ding');
@@ -35,10 +34,10 @@ const Gettext = imports.gettext.domain('ding');
 const _ = Gettext.gettext;
 
 var AutoAr = class {
-
     constructor(desktopManager) {
         this._desktopManager = desktopManager;
-        this._progressWindow = new Gtk.Window({ title: "Archives Operations",
+        this._progressWindow = new Gtk.Window({
+            title: 'Archives Operations',
             resizable: false,
             deletable: false,
             modal: false,
@@ -48,13 +47,15 @@ var AutoAr = class {
         this._progressWindow.connect('delete-event', () => {
             return true;
         });
-        this._progressContainer = new Gtk.Box({ spacing: 12,
+        this._progressContainer = new Gtk.Box({
+            spacing: 12,
             margin_top: 15,
             margin_bottom: 15,
             margin_start: 30,
             margin_end: 30,
             halign: Gtk.Align.CENTER,
-            orientation: Gtk.Orientation.VERTICAL });
+            orientation: Gtk.Orientation.VERTICAL,
+        });
         this._inhibitCookie = null;
         this._progressContainer.connect('remove', () => {
             this._progressElements--;
@@ -84,10 +85,10 @@ var AutoAr = class {
 
     checkAutoAr() {
         if (GnomeAutoar === null) {
-            this._desktopManager.dbusManager.doNotify(_("AutoAr is not installed"),
-                                                      _("To be able to work with compressed files, install file-roller and/or gir-1.2-gnomeAutoAr"));
+            this._desktopManager.dbusManager.doNotify(_('AutoAr is not installed'),
+                _('To be able to work with compressed files, install file-roller and/or gir-1.2-gnomeAutoAr'));
         }
-        return (GnomeAutoar !== null);
+        return GnomeAutoar !== null;
     }
 
     _refreshExtensions() {
@@ -105,7 +106,7 @@ var AutoAr = class {
                 if (!GnomeAutoar.format_is_valid(format)) {
                     continue;
                 }
-            } catch(e) {
+            } catch (e) {
                 continue;
             }
             this._formats.push(format);
@@ -114,9 +115,9 @@ var AutoAr = class {
                 continue;
             }
             this._extensions[extension] = {
-                extension: extension,
-                format: format,
-                filter: null
+                extension,
+                format,
+                filter: null,
             };
         }
         for (let filter = 0; filter <= lastFilter; filter++) {
@@ -124,7 +125,7 @@ var AutoAr = class {
                 if (!GnomeAutoar.filter_is_valid(filter)) {
                     continue;
                 }
-            } catch(e) {
+            } catch (e) {
                 continue;
             }
             this._filters.push(filter);
@@ -133,9 +134,9 @@ var AutoAr = class {
                 continue;
             }
             this._extensions[extension] = {
-                extension: extension,
+                extension,
                 format: null,
-                filter: filter
+                filter,
             };
         }
         for (let format of this._formats) {
@@ -145,16 +146,16 @@ var AutoAr = class {
                     continue;
                 }
                 this._combinedExtensions[extension] = {
-                    extension: extension,
-                    format: format,
-                    filter: filter
+                    extension,
+                    format,
+                    filter,
                 };
             }
         }
     }
 
     extensionIsAvailable(extension) {
-        return ((extension in this._extensions) || (extension in this._combinedExtensions));
+        return (extension in this._extensions) || (extension in this._combinedExtensions);
     }
 
     getFormatAndFilterForExtension(extension) {
@@ -182,7 +183,7 @@ var AutoAr = class {
     }
 
     fileIsCompressed(fileName) {
-        return (this._getFormatAndFilterForFilename(fileName) !== null);
+        return this._getFormatAndFilterForFilename(fileName) !== null;
     }
 
     runToolAsync(autoArTool, cancellable) {
@@ -193,10 +194,10 @@ var AutoAr = class {
                 connections.forEach(c => autoArTool.disconnect(c));
                 reject(new GLib.Error(Gio.IOErrorEnum,
                     Gio.IOErrorEnum.CANCELLED,
-                    'Operation was cancelled'))
+                    'Operation was cancelled'));
             }));
 
-            connections.push(autoArTool.connect('error', (_, error) => {
+            connections.push(autoArTool.connect('error', (w, error) => {
                 connections.forEach(c => autoArTool.disconnect(c));
                 reject(error);
             }));
@@ -218,9 +219,9 @@ var AutoAr = class {
         const formatFilter = this._getFormatAndFilterForFilename(fileName);
         const extSize = formatFilter.extension.length;
         const total = fullPath.length;
-        const folderName = fullPath.substring(0, total-extSize);
+        const folderName = fullPath.substring(0, total - extSize);
         const folder = Gio.File.new_for_path(folderName);
-        const doExtract = new progressDialog(this, _("Extracting files"));
+        const doExtract = new progressDialog(this, _('Extracting files'));
         this._password = null;
         doExtract.doExtractFile(fullPath, folder, folderName).catch(
             e => logError(e));
@@ -233,11 +234,11 @@ var AutoAr = class {
         new CompressDialog(this._desktopManager, fileList, destinationFolder);
     }
 
-    compressFiles(fileList, outputFile, format, filter, password=null) {
+    compressFiles(fileList, outputFile, format, filter, password = null) {
         if (!this.checkAutoAr()) {
             return;
         }
-        const doCompress = new progressDialog(this, _("Compressing files"));
+        const doCompress = new progressDialog(this, _('Compressing files'));
         doCompress.doCompressFiles(fileList, outputFile, format, filter, password).catch(
             e => logError(e));
     }
@@ -254,15 +255,15 @@ var AutoAr = class {
         this._progressContainer.pack_start(progressElement, false, true, 0);
         if (this._progressElements == 0) {
             this._inhibitCookie = this._desktopManager.mainApp.inhibit(null,
-                                                                       Gtk.ApplicationInhibitFlags.LOGOUT | Gtk.ApplicationInhibitFlags.SUSPEND,
-                                                                       message);
+                Gtk.ApplicationInhibitFlags.LOGOUT | Gtk.ApplicationInhibitFlags.SUSPEND,
+                message);
         }
         this._progressElements++;
         this._progressWindow.show_all();
         this._progressWindow.present();
         this.emit('progress-elements-changed', this._progressElements);
     }
-}
+};
 
 Signals.addSignalMethods(AutoAr.prototype);
 
@@ -272,9 +273,11 @@ const progressDialog = class {
         this._waitingForPassword = false;
         this._currentPassword = null;
         this._buttonPromiseAccept = null;
-        this._container = new Gtk.Box({ spacing: 0,
-                                        halign: Gtk.Align.END,
-                                        orientation: Gtk.Orientation.VERTICAL });
+        this._container = new Gtk.Box({
+            spacing: 0,
+            halign: Gtk.Align.END,
+            orientation: Gtk.Orientation.VERTICAL,
+        });
         this._processLabel = new Gtk.Label();
         this._processBar = new Gtk.ProgressBar();
         const container2 = new Gtk.Box({
@@ -291,33 +294,34 @@ const progressDialog = class {
             halign: Gtk.Align.END,
             orientation: Gtk.Orientation.VERTICAL,
         });
-        this._cancelButton = new Gtk.Button({ label: _("Cancel") });
-        this._cancelButton.connect("clicked", () => {
+        this._cancelButton = new Gtk.Button({label: _('Cancel')});
+        this._cancelButton.connect('clicked', () => {
             if (this._buttonPromiseAccept) {
                 this._buttonPromiseAccept(false);
                 return;
             }
             this._cancellable.cancel();
         });
-        this._passOkButton = new Gtk.Button({ label: _("OK") });
+        this._passOkButton = new Gtk.Button({label: _('OK')});
         this._passOkButton.get_style_context().add_class('suggested-action');
-        const passOKfunc = function() {
+        const passOKfunc = function () {
             this._processBar.show();
             this._passEntry.hide();
             this._passOkButton.hide();
             this._currentPassword = this._passEntry.get_text();
             if (this._buttonPromiseAccept) {
                 this._buttonPromiseAccept(true);
-                return;
             }
         }.bind(this);
-        this._passOkButton.connect("clicked", passOKfunc);
-        this._passEntry = new Gtk.Entry({ placeholder_text: _('Enter a password here'),
-                                          input_purpose: Gtk.InputPurpose.PASSWORD,
-                                          visibility: false,
-                                          secondary_icon_name: 'view-conceal',
-                                          secondary_icon_activatable: true,
-                                          secondary_icon_sensitive: true });
+        this._passOkButton.connect('clicked', passOKfunc);
+        this._passEntry = new Gtk.Entry({
+            placeholder_text: _('Enter a password here'),
+            input_purpose: Gtk.InputPurpose.PASSWORD,
+            visibility: false,
+            secondary_icon_name: 'view-conceal',
+            secondary_icon_activatable: true,
+            secondary_icon_sensitive: true,
+        });
         container3.pack_start(this._processLabel, false, true, 0);
         container3.pack_start(this._processBar, false, true, 0);
         container3.pack_start(this._passEntry, false, true, 0);
@@ -330,7 +334,7 @@ const progressDialog = class {
         });
         this._passEntry.connect('activate', passOKfunc);
 
-        const separator = new Gtk.Separator({ orientation: Gtk.Orientation.HORIZONTAL });
+        const separator = new Gtk.Separator({orientation: Gtk.Orientation.HORIZONTAL});
         this._container.pack_start(separator, false, true, 4);
         const updateSeparatorVisibility = () => {
             const progressElements = this._autoAr.getProgressElements();
@@ -353,7 +357,7 @@ const progressDialog = class {
         }
         this._processBar.set_fraction(0);
         this._processLabel.set_label(_("Removing partial file '${outputFile}'").replace(
-            "${outputFile}", file.get_basename()));
+            '${outputFile}', file.get_basename()));
 
         this._removeTimer();
         this._timer = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 250, () => {
@@ -370,8 +374,8 @@ const progressDialog = class {
         }
     }
 
-    async doExtractFile(fullPath, folder, folderName, counter=1) {
-        this._processLabel.set_label(_("Creating destination folder"));
+    async doExtractFile(fullPath, folder, folderName, counter = 1) {
+        this._processLabel.set_label(_('Creating destination folder'));
         this._processBar.pulse();
 
         try {
@@ -386,7 +390,7 @@ const progressDialog = class {
                     GLib.PRIORITY_DEFAULT,
                     this._cancellable);
             } catch (e) {
-                logError(e, `Failed to set attributes to ${folder.get_path()}`)
+                logError(e, `Failed to set attributes to ${folder.get_path()}`);
             }
         } catch (e) {
             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
@@ -404,12 +408,12 @@ const progressDialog = class {
         }
 
         this._processLabel.set_label(_("Extracting files into '${outputPath}'").replace(
-            "${outputPath}", folder.get_basename()));
+            '${outputPath}', folder.get_basename()));
 
         const fullPathFile = Gio.File.new_for_path(fullPath);
         const extractor = GnomeAutoar.Extractor.new(fullPathFile, folder);
         extractor.set_output_is_dest(true);
-        if ((extractor.set_passphrase) && (this._currentPassword !== null)) {
+        if (extractor.set_passphrase && (this._currentPassword !== null)) {
             extractor.set_passphrase(this._currentPassword);
         }
 
@@ -420,29 +424,31 @@ const progressDialog = class {
         });
 
         let progressTotal = -1;
-        const progressID = extractor.connect('progress', (_, completedSize) => {
+        const progressID = extractor.connect('progress', (w, completedSize) => {
             this._removeTimer();
 
-            if (progressTotal <= 0)
+            if (progressTotal <= 0) {
                 progressTotal = extractor.get_total_size();
+            }
 
-            if (progressTotal > 0)
+            if (progressTotal > 0) {
                 this._processBar.set_fraction(completedSize / progressTotal);
+            }
         });
 
         try {
             await this._autoAr.runToolAsync(extractor, this._cancellable);
 
-            this._autoAr.notify(_("Extraction completed"),
+            this._autoAr.notify(_('Extraction completed'),
                 _("Extracting '${fullPathFile}' has been completed.").replace(
-                    "${fullPathFile}", fullPathFile.get_basename()));
+                    '${fullPathFile}', fullPathFile.get_basename()));
         } catch (e) {
             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
                 this._cancellable = new Gio.Cancellable();
                 await this._cleanupFile(folder, this._cancellable);
-                this._autoAr.notify(_("Extraction cancelled"),
+                this._autoAr.notify(_('Extraction cancelled'),
                     _("Extracting '${fullPathFile}' has been cancelled by the user.").replace(
-                        "${fullPathFile}", fullPathFile.get_basename()));
+                        '${fullPathFile}', fullPathFile.get_basename()));
             } else {
                 if ((e.code == GnomeAutoar.PASSPHRASE_REQUIRED_ERRNO) && (e.domain == GnomeAutoar.Extractor.quark())) {
                     this._waitingForPassword = true;
@@ -451,10 +457,10 @@ const progressDialog = class {
                     this._passOkButton.show();
                     this._passOkButton.set_receives_default(true);
                     const tmpfile = Gio.File.new_for_path(fullPath);
-                    this._processLabel.set_label(_("Passphrase required for ${filename}").replace("${filename}", tmpfile.get_basename()));
+                    this._processLabel.set_label(_('Passphrase required for ${filename}').replace('${filename}', tmpfile.get_basename()));
                 } else {
                     this._waitingForPassword = false;
-                    this._autoAr.notify(_("Error during extraction"), e.message);
+                    this._autoAr.notify(_('Error during extraction'), e.message);
                 }
                 await this._cleanupFile(folder, this._cancellable);
             }
@@ -469,49 +475,50 @@ const progressDialog = class {
             const retval = await this._waitButtons();
             this._buttonPromiseAccept = null;
             this._waitingForPassword = false;
-            if (retval == true) {
+            if (retval) {
                 await this.doExtractFile(fullPath, folder, folderName);
             }
         }
     }
 
-    async _waitButtons() {
-        return new Promise((accept, reject) => {
+    _waitButtons() {
+        return new Promise(accept => {
             this._buttonPromiseAccept = accept;
         });
     }
-    async doCompressFiles(fileList, outputFile, format, filter, password=null) {
+
+    async doCompressFiles(fileList, outputFile, format, filter, password = null) {
         const output = Gio.File.new_for_path(outputFile);
         this._processLabel.set_label(_("Compressing files into '${outputFile}'").replace(
-            "${outputFile}", output.get_basename()));
+            '${outputFile}', output.get_basename()));
         const compressor = GnomeAutoar.Compressor.new(fileList, output, format, filter, false);
         compressor.set_output_is_dest(true);
         if (password) {
             compressor.set_passphrase(password);
         }
 
-        const progressID = compressor.connect("progress", () => this._processBar.pulse());
+        const progressID = compressor.connect('progress', () => this._processBar.pulse());
 
         try {
             await this._autoAr.runToolAsync(compressor, this._cancellable);
 
-            this._autoAr.notify(_("Compression completed"),
+            this._autoAr.notify(_('Compression completed'),
                 _("Compressing files into '${outputFile}' has been completed.").replace(
-                    "${outputFile}", output.get_basename()));
+                    '${outputFile}', output.get_basename()));
         } catch (e) {
             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.EXISTS)) {
-                this._autoAr.notify(_("Cancelled compression"),
+                this._autoAr.notify(_('Cancelled compression'),
                     _("The output file '${outputFile}' already exists.").replace(
-                        "${outputFile}", output.get_basename()));
+                        '${outputFile}', output.get_basename()));
             } else {
                 this._cancellable = new Gio.Cancellable();
                 await this._cleanupFile(output, this._cancellable);
                 if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
-                this._autoAr.notify(_("Cancelled compression"),
-                    _("Compressing files into '${outputFile}' has been cancelled by the user.").replace(
-                        "${outputFile}", output.get_basename()));
+                    this._autoAr.notify(_('Cancelled compression'),
+                        _("Compressing files into '${outputFile}' has been cancelled by the user.").replace(
+                            '${outputFile}', output.get_basename()));
                 } else {
-                    this._autoAr.notify(_("Error during compression"), e.message);
+                    this._autoAr.notify(_('Error during compression'), e.message);
                 }
             }
         } finally {
@@ -526,12 +533,13 @@ const progressDialog = class {
             this._timer = 0;
         }
     }
+
     _destroy() {
         this._autoAr.disconnect(this._elementsChangedId);
         this._cancellable.cancel();
         this._container.destroy();
     }
-}
+};
 
 
 const CompressDialog = class {
@@ -562,17 +570,17 @@ const CompressDialog = class {
         container.spacing = 6;
 
         if (Prefs.nautilusCompression) {
-            this._selectedType = Prefs.nautilusCompression.get_enum("default-compression-format");
+            this._selectedType = Prefs.nautilusCompression.get_enum('default-compression-format');
         } else {
             this._selectedType = Enums.CompressionType.ZIP;
         }
 
-        const archive_label = new Gtk.Label({
-            label: '<b>' + _('Archive name') + '</b>',
+        const archiveLabel = new Gtk.Label({
+            label: `<b>${_('Archive name')}</b>`,
             xalign: 0,
             use_markup: true,
         });
-        container.pack_start(archive_label, false, true, 0);
+        container.pack_start(archiveLabel, false, true, 0);
         const box1 = new Gtk.Box({
             spacing: 12,
             orientation: Gtk.Orientation.HORIZONTAL,
@@ -588,26 +596,33 @@ const CompressDialog = class {
             orientation: Gtk.Orientation.HORIZONTAL,
         });
         this._extensionLabel = new Gtk.Label();
-        this._extensionLock = new Gtk.Image({ icon_name: 'dialog-password' });
+        this._extensionLock = new Gtk.Image({icon_name: 'dialog-password'});
         extensionContainer.pack_start(this._extensionLabel, false, false, 0);
         extensionContainer.pack_start(this._extensionLock, false, false, 5);
         this._extensionDropdown.add(extensionContainer);
-        this._extensionPopover = new Gtk.Popover({ relative_to: this._extensionDropdown,
-                                                   border_width: 8 });
-        this._extensionPopoverContainer = new Gtk.Box({ spacing: 4,
-                                                        orientation: Gtk.Orientation.VERTICAL,
+        this._extensionPopover = new Gtk.Popover({
+            relative_to: this._extensionDropdown,
+            border_width: 8,
+        });
+        this._extensionPopoverContainer = new Gtk.Box({
+            spacing: 4,
+            orientation: Gtk.Orientation.VERTICAL,
         });
         this._extensionPopover.add(this._extensionPopoverContainer);
 
-        this._passLabel = new Gtk.Label({ label: _('Password'),
-                                          margin_top: 6,
-                                          xalign: 0 });
-        this._passEntry = new Gtk.Entry({ placeholder_text: _('Enter a password here'),
-                                          input_purpose: Gtk.InputPurpose.PASSWORD,
-                                          visibility: false,
-                                          secondary_icon_name: 'view-conceal',
-                                          secondary_icon_activatable: true,
-                                          secondary_icon_sensitive: true });
+        this._passLabel = new Gtk.Label({
+            label: _('Password'),
+            margin_top: 6,
+            xalign: 0,
+        });
+        this._passEntry = new Gtk.Entry({
+            placeholder_text: _('Enter a password here'),
+            input_purpose: Gtk.InputPurpose.PASSWORD,
+            visibility: false,
+            secondary_icon_name: 'view-conceal',
+            secondary_icon_activatable: true,
+            secondary_icon_sensitive: true,
+        });
 
         container.pack_start(box1, false, true, 0);
         box1.pack_start(this._nameEntry, false, true, 0);
@@ -628,7 +643,7 @@ const CompressDialog = class {
             this._extensionPopover.popup();
             for (let index in this._compressOptions) {
                 const data = this._compressOptions[index];
-                data.selected_icon.visible = (index == this._selectedType);
+                data.selected_icon.visible = index == this._selectedType;
             }
         });
         this._nameEntry.connect('changed', () => this._updateStatus());
@@ -658,7 +673,7 @@ const CompressDialog = class {
 
     _updateStatus() {
         if (Prefs.nautilusCompression) {
-            Prefs.nautilusCompression.set_enum("default-compression-format", this._selectedType);
+            Prefs.nautilusCompression.set_enum('default-compression-format', this._selectedType);
         }
         const label = this._compressOptions[this._selectedType].extension;
         this._extensionLabel.label = label;
@@ -671,14 +686,12 @@ const CompressDialog = class {
         this._okButton.sensitive = true;
         if (this._desktopManager._fileList.map(f => f.fileName).includes(outputfile)) {
             this._okButton.sensitive = false;
-                if (!context.has_class('not-found')) {
-                    context.add_class('not-found');
-                }
-            } else {
-                if (context.has_class('not-found')) {
-                    context.remove_class('not-found');
-                }
+            if (!context.has_class('not-found')) {
+                context.add_class('not-found');
             }
+        } else if (context.has_class('not-found')) {
+            context.remove_class('not-found');
+        }
         if (password && (this._passEntry.get_text_length() == 0)) {
             this._okButton.sensitive = false;
         }
@@ -690,27 +703,27 @@ const CompressDialog = class {
     _fillComboBox() {
         this._compressOptions = {};
         this._addComboEntry(Enums.CompressionType.ZIP, {
-            extension: ".zip",
-            id: "zip",
-            description: _("Compatible with all operating systems."),
+            extension: '.zip',
+            id: 'zip',
+            description: _('Compatible with all operating systems.'),
             password: false,
         });
         this._addComboEntry(Enums.CompressionType.ENCRYPTED_ZIP, {
-            extension: ".zip",
-            id: "encryptedzip",
-            description: _("Password protected .zip, must be installed on Windows and Mac."),
+            extension: '.zip',
+            id: 'encryptedzip',
+            description: _('Password protected .zip, must be installed on Windows and Mac.'),
             password: true,
         });
         this._addComboEntry(Enums.CompressionType.TAR_XZ, {
-            extension: ".tar.xz",
-            id: "tar.xz",
-            description: _("Smaller archives but Linux and Mac only."),
+            extension: '.tar.xz',
+            id: 'tar.xz',
+            description: _('Smaller archives but Linux and Mac only.'),
             password: false,
         });
         this._addComboEntry(Enums.CompressionType.SEVEN_ZIP, {
-            extension: ".7z",
-            id: "7z",
-            description: _("Smaller archives but must be installed on Windows and Mac."),
+            extension: '.7z',
+            id: '7z',
+            description: _('Smaller archives but must be installed on Windows and Mac.'),
             password: false,
         });
     }
@@ -720,38 +733,42 @@ const CompressDialog = class {
         if (!this._desktopManager.autoAr.extensionIsAvailable(data.extension)) {
             return;
         }
-        const container = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL });
-        const container2 = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL });
-        const container3 = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL });
-        container3.pack_start(new Gtk.Label({ label: data.extension,
-                                              justify: Gtk.Justification.LEFT,
-                                              xalign: 0 }),
-                              false,
-                              false,
-                              0);
+        const container = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL});
+        const container2 = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL});
+        const container3 = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL});
+        container3.pack_start(new Gtk.Label({
+            label: data.extension,
+            justify: Gtk.Justification.LEFT,
+            xalign: 0,
+        }),
+        false,
+        false,
+        0);
         if (data.password) {
-            container3.pack_start(new Gtk.Image({ icon_name: 'dialog-password' }),
-                                  false,
-                                  false,
-                                  5);
+            container3.pack_start(new Gtk.Image({icon_name: 'dialog-password'}),
+                false,
+                false,
+                5);
         }
         container.pack_start(container3, false, false, 0);
-        container.pack_start(new Gtk.Label({ label: data.description,
-                                             justify: Gtk.Justification.LEFT,
-                                             xalign: 0 }),
-                             false,
-                             false,
-                             0);
+        container.pack_start(new Gtk.Label({
+            label: data.description,
+            justify: Gtk.Justification.LEFT,
+            xalign: 0,
+        }),
+        false,
+        false,
+        0);
         const button = new Gtk.Button();
         container2.pack_start(container, true, true, 0);
-        data.selected_icon = new Gtk.Image({ icon_name: 'emblem-default' });
+        data.selected_icon = new Gtk.Image({icon_name: 'emblem-default'});
         container2.pack_start(data.selected_icon, false, false, 0);
         button.add(container2);
         this._extensionPopoverContainer.pack_start(button, false, true, 0);
-        button.connect("clicked", () => {
+        button.connect('clicked', () => {
             this._selectedType = type;
             this._extensionPopover.popdown();
             this._updateStatus();
         });
     }
-}
+};

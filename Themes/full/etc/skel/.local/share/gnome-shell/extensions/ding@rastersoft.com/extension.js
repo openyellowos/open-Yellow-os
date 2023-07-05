@@ -19,6 +19,7 @@
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Meta = imports.gi.Meta;
+const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 
 const Main = imports.ui.main;
@@ -40,6 +41,9 @@ let data = {};
 
 var DesktopIconsUsableArea = null;
 
+/**
+ *
+ */
 function init() {
     data.isEnabled = false;
     data.launchDesktopId = 0;
@@ -47,7 +51,7 @@ function init() {
     data.dbusTimeoutId = 0;
 
     data.GnomeShellOverride = null;
-    data.GnomeShellVersion = parseInt(Config.PACKAGE_VERSION.split(".")[0]);
+    data.GnomeShellVersion = parseInt(Config.PACKAGE_VERSION.split('.')[0]);
 
     /* The constructor of the EmulateX11 class only initializes some
      * internal properties, but nothing else. In fact, it has its own
@@ -97,7 +101,6 @@ function enable() {
  * The true code that configures everything and launches the desktop program
  */
 function innerEnable() {
-
     if (data.startupPreparedId !== null) {
         Main.layoutManager.disconnect(data.startupPreparedId);
         data.startupPreparedId = null;
@@ -144,20 +147,20 @@ function innerEnable() {
      * passing the URIs as parameters, and delegate that to the DING Gnome Shell extension. This is easily done
      * with a GLib.SimpleAction.
      */
-    data.dbusConnectionId = Gio.bus_own_name(Gio.BusType.SESSION, "com.rastersoft.dingextension", Gio.BusNameOwnerFlags.NONE, null, (connection, name) => {
+    data.dbusConnectionId = Gio.bus_own_name(Gio.BusType.SESSION, 'com.rastersoft.dingextension', Gio.BusNameOwnerFlags.NONE, null, (connection, name) => {
         data.dbusConnection = connection;
 
         data.doCopy = new Gio.SimpleAction({
             name: 'doCopy',
-            parameter_type: new GLib.VariantType('as')
+            parameter_type: new GLib.VariantType('as'),
         });
         data.doCut = new Gio.SimpleAction({
             name: 'doCut',
-            parameter_type: new GLib.VariantType('as')
+            parameter_type: new GLib.VariantType('as'),
         });
         data.disableTimer = new Gio.SimpleAction({
-            name: 'disableTimer'
-        })
+            name: 'disableTimer',
+        });
         data.desktopGeometry = Gio.SimpleAction.new_stateful('desktopGeometry', new GLib.VariantType('av'), getDesktopGeometry());
         data.desktopGeometry.set_enabled(true);
         data.doCopyId = data.doCopy.connect('activate', manageCutCopy);
@@ -199,9 +202,13 @@ function innerEnable() {
  * To maintain compatibility, we check the current Gnome Shell version and, based on that, we use the
  * binary or the text clipboards.
  */
+/**
+ *
+ * @param action
+ * @param parameters
+ */
 function manageCutCopy(action, parameters) {
-
-    let content = "";
+    let content = '';
     if (data.GnomeShellVersion < 40) {
         content = 'x-special/nautilus-clipboard\n';
     }
@@ -221,7 +228,7 @@ function manageCutCopy(action, parameters) {
     }
 
     if (data.GnomeShellVersion < 40) {
-        Clipboard.set_text(CLIPBOARD_TYPE, content + "\n");
+        Clipboard.set_text(CLIPBOARD_TYPE, `${content}\n`);
     } else {
         Clipboard.set_content(CLIPBOARD_TYPE, 'x-special/gnome-copied-files', ByteArray.toGBytes(ByteArray.fromString(content)));
     }
@@ -230,7 +237,7 @@ function manageCutCopy(action, parameters) {
 /**
  * Kills the current desktop program
  */
- function killCurrentProcess() {
+function killCurrentProcess() {
     if (data.launchDesktopId) {
         GLib.source_remove(data.launchDesktopId);
         data.launchDesktopId = 0;
@@ -243,14 +250,13 @@ function manageCutCopy(action, parameters) {
         data.currentProcess.subprocess.send_signal(15);
     }
     data.currentProcess = null;
-    data.x11Manager.set_wayland_client(null);
+    data.x11Manager.setWaylandClient(null);
 }
 
 /**
  * Disables the extension
  */
 function disable() {
-
     DesktopIconsUsableArea = null;
     data.isEnabled = false;
     killCurrentProcess();
@@ -316,29 +322,35 @@ function disable() {
     }
 }
 
+/**
+ *
+ */
 function updateDesktopGeometry() {
     if (data.actionGroup && (Main.layoutManager.monitors.length != 0)) {
         data.actionGroup.change_action_state('desktopGeometry', getDesktopGeometry());
     }
 }
 
+/**
+ *
+ */
 function getDesktopGeometry() {
     let desktopList = [];
     let ws = global.workspace_manager.get_workspace_by_index(0);
-    for(let monitorIndex = 0; monitorIndex < Main.layoutManager.monitors.length; monitorIndex++) {
+    for (let monitorIndex = 0; monitorIndex < Main.layoutManager.monitors.length; monitorIndex++) {
         let area = data.visibleArea.getMonitorGeometry(ws, monitorIndex);
         let desktopListElement = new GLib.Variant('a{sd}', {
-            'x' : area.x,
+            'x': area.x,
             'y': area.y,
-            'width' : area.width,
-            'height' : area.height,
-            'zoom' : area.scale,
-            'marginTop' : area.marginTop,
-            'marginBottom' : area.marginBottom,
-            'marginLeft' : area.marginLeft,
-            'marginRight' : area.marginRight,
-            'monitorIndex' : monitorIndex,
-            'primaryMonitor' : Main.layoutManager.primaryIndex
+            'width': area.width,
+            'height': area.height,
+            'zoom': area.scale,
+            'marginTop': area.marginTop,
+            'marginBottom': area.marginBottom,
+            'marginLeft': area.marginLeft,
+            'marginRight': area.marginRight,
+            monitorIndex,
+            'primaryMonitor': Main.layoutManager.primaryIndex,
         });
         desktopList.push(desktopListElement);
     }
@@ -354,8 +366,10 @@ function getDesktopGeometry() {
  * doesn't fail if it doesn't exist.
  */
 
+/**
+ *
+ */
 function doKillAllOldDesktopProcesses() {
-
     let procFolder = Gio.File.new_for_path('/proc');
     if (!procFolder.query_exists(null)) {
         return;
@@ -383,7 +397,7 @@ function doKillAllOldDesktopProcesses() {
                 contents += String.fromCharCode(readData[i]);
             }
         }
-        let path = 'gjs ' + GLib.build_filenamev([ExtensionUtils.getCurrentExtension().path, 'ding.js']);
+        let path = `gjs ${GLib.build_filenamev([ExtensionUtils.getCurrentExtension().path, 'ding.js'])}`;
         if (contents.startsWith(path)) {
             let proc = new Gio.Subprocess({argv: ['/bin/kill', filename]});
             proc.init(null);
@@ -392,9 +406,13 @@ function doKillAllOldDesktopProcesses() {
     }
 }
 
+/**
+ *
+ * @param reloadTime
+ */
 function doRelaunch(reloadTime) {
     data.currentProcess = null;
-    data.x11Manager.set_wayland_client(null);
+    data.x11Manager.setWaylandClient(null);
     if (data.isEnabled) {
         if (data.launchDesktopId) {
             GLib.source_remove(data.launchDesktopId);
@@ -414,8 +432,7 @@ function doRelaunch(reloadTime) {
  * debug it.
  */
 function launchDesktop() {
-
-    global.log("Launching DING process");
+    global.log('Launching DING process');
     let argv = [];
     argv.push(GLib.build_filenamev([ExtensionUtils.getCurrentExtension().path, 'ding.js']));
     // Specify that it must work as true desktop
@@ -424,13 +441,13 @@ function launchDesktop() {
     argv.push('-P');
     argv.push(ExtensionUtils.getCurrentExtension().path);
 
-    data.currentProcess = new LaunchSubprocess(0, "DING");
+    data.currentProcess = new LaunchSubprocess(0, 'DING');
     data.currentProcess.set_cwd(GLib.get_home_dir());
-    if (null === data.currentProcess.spawnv(argv)) {
+    if (data.currentProcess.spawnv(argv) === null) {
         doRelaunch(1000);
         return;
     }
-    data.x11Manager.set_wayland_client(data.currentProcess);
+    data.x11Manager.setWaylandClient(data.currentProcess);
     data.launchTime = GLib.get_monotonic_time();
 
     /*
@@ -468,13 +485,18 @@ function launchDesktop() {
  * @param {string} process_id An string id for the debug output
  */
 var LaunchSubprocess = class {
-
     constructor(flags, process_id) {
         this._process_id = process_id;
         this.cancellable = new Gio.Cancellable();
         this._launcher = new Gio.SubprocessLauncher({flags: flags | Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_MERGE});
         if (Meta.is_wayland_compositor()) {
-            this._waylandClient = Meta.WaylandClient.new(this._launcher);
+            try {
+                this._waylandClient = Meta.WaylandClient.new(this._launcher);
+            } catch (e) {
+                this._waylandClient = Meta.WaylandClient.new(global.context,
+                                                             this._launcher);
+            }
+
             if (Config.PACKAGE_VERSION == '3.38.0') {
                 // workaround for bug in 3.38.0
                 this._launcher.ref();
@@ -503,7 +525,7 @@ var LaunchSubprocess = class {
         }
         this._launcher = null;
         if (this.subprocess) {
-                /*
+            /*
                  * It reads STDOUT and STDERR and sends it to the journal using global.log(). This allows to
                  * have any error from the desktop app in the same journal than other extensions. Every line from
                  * the desktop program is prepended with the "process_id" parameter sent in the constructor.
@@ -544,7 +566,7 @@ var LaunchSubprocess = class {
     }
 
     set_cwd(cwd) {
-        this._launcher.set_cwd (cwd);
+        this._launcher.set_cwd(cwd);
     }
 
     read_output() {
@@ -554,11 +576,13 @@ var LaunchSubprocess = class {
         this._dataInputStream.read_line_async(GLib.PRIORITY_DEFAULT, this.cancellable, (object, res) => {
             try {
                 const [output, length] = object.read_line_finish_utf8(res);
-                if (length)
+                if (length) {
                     print(`${this._process_id}: ${output}`);
+                }
             } catch (e) {
-                if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
                     return;
+                }
                 logError(e, `${this._process_id}_Error`);
             }
 
@@ -568,9 +592,10 @@ var LaunchSubprocess = class {
 
     /**
      * Queries whether the passed window belongs to the launched subprocess or not.
+     *
      * @param {MetaWindow} window The window to check.
      */
-    query_window_belongs_to (window) {
+    query_window_belongs_to(window) {
         if (!Meta.is_wayland_compositor()) {
             return false;
         }
@@ -578,17 +603,17 @@ var LaunchSubprocess = class {
             return false;
         }
         try {
-            let owns_window = this._waylandClient.owns_window(window);
-            if (owns_window && (this._launch_timer != 0) && (this._waiting_for_windows != 0)) {
-                global.log(`Received notification for window. ${this._waiting_for_windows-1} notifications remaining.`);
+            let ownsWindow = this._waylandClient.owns_window(window);
+            if (ownsWindow && (this._launch_timer != 0) && (this._waiting_for_windows != 0)) {
+                global.log(`Received notification for window. ${this._waiting_for_windows - 1} notifications remaining.`);
                 this._waiting_for_windows--;
                 if (this._waiting_for_windows == 0) {
                     GLib.source_remove(this._launch_timer);
                     this._launch_timer = 0;
                 }
             }
-            return owns_window;
-        } catch(e) {
+            return ownsWindow;
+        } catch (error) {
             global.log(`Exception error: ${error.message}\n${error.stack}`);
             return false;
         }
@@ -605,4 +630,4 @@ var LaunchSubprocess = class {
             this._waylandClient.hide_from_window_list(window);
         }
     }
-}
+};

@@ -17,36 +17,35 @@
  */
 'use strict';
 const Gtk = imports.gi.Gtk;
-const Pango = imports.gi.Pango;
 const DesktopIconsUtil = imports.desktopIconsUtil;
 const Gettext = imports.gettext.domain('ding');
 
 const _ = Gettext.gettext;
 
 var ShowErrorPopup = class {
-
     constructor(text, secondaryText, modal) {
-
-        this._window = new Gtk.MessageDialog({window_position: Gtk.WindowPosition.CENTER_ON_PARENT,
-                                              transient_for: null,
-                                              message_type: Gtk.MessageType.ERROR,
-                                              buttons: Gtk.ButtonsType.NONE});
+        this._window = new Gtk.MessageDialog({
+            window_position: Gtk.WindowPosition.CENTER_ON_PARENT,
+            transient_for: null,
+            message_type: Gtk.MessageType.ERROR,
+            buttons: Gtk.ButtonsType.NONE,
+        });
         let labels = this._window.get_message_area().get_children();
         labels[1].set_justify(Gtk.Justification.CENTER);
         this._window.secondary_use_markup = true;
         this._window.text = text;
         this._window.secondary_text = secondaryText;
         DesktopIconsUtil.windowHidePagerTaskbarModal(this._window, true);
-        this.deleteButton = this._window.add_button(_("Close"), Gtk.ResponseType.OK);
+        this.deleteButton = this._window.add_button(_('Close'), Gtk.ResponseType.OK);
         this.deleteButton.connect('clicked', () => {
-                this._window.hide();
-                this._window.destroy();
-                this._window = null;
+            this._window.hide();
+            this._window.destroy();
+            this._window = null;
         });
         this._window.connect('delete-event', () => {
-                this._window.destroy();
-                this._window = null;
-            });
+            this._window.destroy();
+            this._window = null;
+        });
         if (modal) {
             this._window.show();
         }
@@ -55,7 +54,7 @@ var ShowErrorPopup = class {
     run() {
         this._window.show();
         this.timeoutClose(3000);
-     }
+    }
 
     async timeoutClose(time) {
         await DesktopIconsUtil.waitDelayMs(time);
