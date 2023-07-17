@@ -1,7 +1,7 @@
-PRETTY_NAME="open.Yellow.os 23.05 (undecided)"
+PRETTY_NAME="open.Yellow.os 23.07 (undecided)"
 NAME="open.Yellow.os"
-VERSION_ID="23.05"
-VERSION="23.05 (undecided)"
+VERSION_ID="23.07"
+VERSION="23.07 (undecided)"
 VERSION_CODENAME=bookworm
 ID=debian
 ID_LIKE=debian
