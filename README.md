@@ -16,7 +16,7 @@ open.Yellow.osでビルドすることを想定しています。
 ※Ubuntuでビルドする場合は「binutils」も必要です。
 
 # ビルド
-## oYoのGitからbuild-iso-mxのソースを取得する
+## oYoのGitからopen-yellow-osのソースを取得する
 任意のディレクトリで以下のコマンドを実行し、Gitからopen-yellow-osのソースを取得します。
 
 `git clone https://github.com/openyellowos/open-Yellow-os.git`
