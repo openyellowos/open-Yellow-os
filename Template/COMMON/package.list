@@ -164,6 +164,7 @@ pciutils
 plymouth
 plymouth-themes
 poppler-data
+powertop
 #printer-driver-cups-pdf
 pulseaudio
 pulseaudio-module-bluetooth
@@ -190,6 +191,7 @@ task-laptop
 task-japanese
 tasksel
 timeshift
+tlp
 tracker
 ufw
 usbutils
