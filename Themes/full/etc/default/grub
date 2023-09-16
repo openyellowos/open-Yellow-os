@@ -4,3 +4,4 @@ GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
 GRUB_TIMEOUT=10
 GRUB_DISTRIBUTOR='open.Yellow.os'
 GRUB_THEME="/boot/grub/themes/theme.txt"
+GRUB_FONT=/boot/grub/fonts/unifont24.pf2
