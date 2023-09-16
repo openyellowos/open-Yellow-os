@@ -1423,7 +1423,8 @@ do_stage_5() {
     fi
 
 #    say "Write initrd-release file"
-#    write_initrd_release $sqfs_dir $SUDO
+    say "write_initrd_release1 $sqfs_dir $SUDO"
+    write_initrd_release $sqfs_dir $SUDO
 
     say "Clean out log files and other files"
     for f in $(gather delete-files); do
@@ -1692,7 +1693,8 @@ Bootloader_Data
     fi
 
 #    say "Write initrd-release file"
-#    write_initrd_release $initrd_dir
+    say "write_initrd_release2 $initrd_dir"
+    write_initrd_release $initrd_dir
 
     is_antiX && initrd_encrypt="--encrypt"
 
@@ -2709,6 +2711,7 @@ write_initrd_release() {
     : ${ASCII_CODE_NAME:=$(echo $CODE_NAME | utf8_to_ascii)}
 
     if [[ $ASCII_CODE_NAME != $CODE_NAME ]]; then
+        say "IF1 $file1"
 
         cat << Initrd_Version | $sudo tee $file1
 NAME="$DISTRO_NAME"
@@ -2724,7 +2727,7 @@ BUG_REPORT_URL="$BUG_REPORT_URL"
 Initrd_Version
 
     else
-
+        say "IF2"
         cat << Initrd_Version | $sudo tee $dir/etc/initrd-release
 NAME="$DISTRO_NAME"
 VERSION="$DISTRO_VERSION ($CODE_NAME)"
@@ -2738,7 +2741,8 @@ Initrd_Version
 
     fi
 
-    $sudo cp $file1 $file2
+    say "cp $file1 $file2" 
+    $sudo mv $file1 $file2
 }
 
 utf8_to_ascii() {
