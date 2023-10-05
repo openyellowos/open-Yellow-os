@@ -169,6 +169,7 @@ powertop
 pulseaudio
 pulseaudio-module-bluetooth
 python3
+qgnomeplatform-qt5
 qml-module-qtquick2
 qml-module-qtquick-window2
 resolvconf
