@@ -226,8 +226,8 @@ main_wrapper() {
 
     read_distro_release /etc/initrd-release
     : ${DISTRO_BUG_REPORT_URL:=$BUG_REPORT_URL}
-    : ${DISTRO_NAME:=undecided}
-    : ${DISTRO_PRETTY_NAME:=open.Yellow.os (undecided)}
+    : ${DISTRO_NAME:=open.Yellow.os}
+    : ${DISTRO_PRETTY_NAME:=open.Yellow.os(Freesia)}
 
     custom_code 0 'before reading boot codes'
 
