@@ -1,0 +1,16 @@
+name: Build ISO
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Packages for Build ISO
+        run: |
+          sudo apt-get install -y debootstrap syslinux-utils zsync expect git xorriso mkisofs genisoimage
+          sudo apt-get install -y binutils
+      - name: Build ISO
+        run: |
+          sudo ./build-iso -0
