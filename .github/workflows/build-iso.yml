@@ -14,3 +14,9 @@ jobs:
       - name: Build ISO
         run: |
           sudo ./build-iso -0
+      - name: Upload ISO
+        uses: actions/upload-artifact@v3
+        with:
+          name: open.Yellow.os ISO Image
+          path: Remaster/iso-files/**
+
