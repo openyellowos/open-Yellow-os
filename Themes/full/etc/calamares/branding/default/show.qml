@@ -13,106 +13,56 @@ Presentation
      }
     Slide {
         Image {
-            anchors.centerIn: parent
             id: image01
-            x:0
-            y:0
-            width: 800
-            height: 450
+            source: "slide01.png"
+            width: 864
             fillMode: Image.PreserveAspectFit
-            smooth: true
-            source: "slide01.jpg"
+            anchors.centerIn: parent
           }
      }
     Slide {
         Image {
-            anchors.centerIn: parent
             id: image02
-            x:0
-            y:0
-            width: 800
-            height: 450
+            source: "slide02.png"
+            width: 864
             fillMode: Image.PreserveAspectFit
-            smooth: true
-            source: "slide02.jpg"
+            anchors.centerIn: parent
           }
      }
     Slide {
         Image {
-            anchors.centerIn: parent
             id: image03
-            x:0
-            y:0
-            width: 800
-            height: 450
+            source: "slide03.png"
+            width: 864
             fillMode: Image.PreserveAspectFit
-            smooth: true
-            source: "slide03.jpg"
+            anchors.centerIn: parent
           }
      }
     Slide {
         Image {
-            anchors.centerIn: parent
             id: image04
-            x:0
-            y:0
-            width: 800
-            height: 450
+            source: "slide04.png"
+            width: 864
             fillMode: Image.PreserveAspectFit
-            smooth: true
-            source: "slide04.jpg"
+            anchors.centerIn: parent
           }
      }
     Slide {
         Image {
-            anchors.centerIn: parent
             id: image05
-            x:0
-            y:0
-            width: 800
-            height: 450
+            source: "slide05.png"
+            width: 864
             fillMode: Image.PreserveAspectFit
-            smooth: true
-            source: "slide05.jpg"
+            anchors.centerIn: parent
           }
      }
     Slide {
         Image {
-            anchors.centerIn: parent
             id: image06
-            x:0
-            y:0
-            width: 800
-            height: 450
+            source: "slide06.png"
+            width: 864
             fillMode: Image.PreserveAspectFit
-            smooth: true
-            source: "slide06.jpg"
-          }
-     }
-    Slide {
-        Image {
             anchors.centerIn: parent
-            id: image07
-            x:0
-            y:0
-            width: 800
-            height: 450
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            source: "slide07.jpg"
-          }
-     }
-    Slide {
-        Image {
-            anchors.centerIn: parent
-            id: image08
-            x:0
-            y:0
-            width: 800
-            height: 450
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            source: "slide08.jpg"
           }
      }
 }

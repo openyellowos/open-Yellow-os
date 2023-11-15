@@ -2,9 +2,9 @@
 componentName:   default
 welcomeStyleCalamares: true
 welcomeExpandingLogo: true
-windowExpanding: normal
-windowSize: 700px,550px
+windowExpanding: noexpand
 windowPlacement: center
+windowSize: 960px,565px
 
 strings:
     productName:         open.Yellow.os
