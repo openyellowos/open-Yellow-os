@@ -13,7 +13,7 @@ CODE_NAME="Freesia"
 ASCII_CODE_NAME="Freesia"
 DEBIAN_RELEASE="bookworm"
 DISTRO_NAME="open.Yellow.os"
-DISTRO_VERSION="23.11"
+DISTRO_VERSION="24.02"
 HOME_URL="https://openyellowos.com/"
 
 #Kernel templates...comment and uncomment depending on what you are building
@@ -26,7 +26,7 @@ HOME_URL="https://openyellowos.com/"
 #standard 64 bit
 K_REVISION="*"
 K_TEMPLATE="%V-%A"
-K_VERSION="6.1.0-13"
+K_VERSION="6.1.0-17"
 UNSIGNED=""
 
 #system defaults, these end up inside the squash file system mostly
@@ -34,7 +34,7 @@ LIVE_USER="demo"
 LOCALE="ja_JP.UTF-8"
 MIRROR="jp"
 NEW_HOSTNAME="oYo"
-RELEASE_DATE="November 06, 2023"
+RELEASE_DATE="February 5, 2024"
 TIME_ZONE="Asia/Tokyo"
 ENABLE_LOCALES="Default"
 CURSOR_ICON_THEME="/usr/share/icons/Adwaita/cursor.theme"

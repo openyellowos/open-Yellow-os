@@ -121,6 +121,7 @@ grub2-common
 gsettings-desktop-schemas
 gstreamer1.0-plugins-base
 gstreamer1.0-plugins-good
+gufw
 gvfs-backends
 gvfs-fuse
 #htop
