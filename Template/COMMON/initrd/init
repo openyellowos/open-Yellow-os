@@ -3700,6 +3700,10 @@ _error() {
                      tsplash_on
                      return
                  fi ;;
+
+            bash)
+                bash
+                return ;;
         esac
         printf "\n${m_co} %s: >>$yellow$reply$m_co<<. %s:$nc_co\n" \
              "$_Unknown_command_"  "$_Please_try_again_"
