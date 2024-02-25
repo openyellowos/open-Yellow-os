@@ -165,6 +165,7 @@ pciutils
 plymouth
 plymouth-themes
 poppler-data
+power-profiles-daemon
 powertop
 #printer-driver-cups-pdf
 pulseaudio
