@@ -9,6 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Packages for Build ISO
         run: |
+          sudo apt-get update
           sudo apt-get install -y debootstrap syslinux-utils zsync expect git xorriso mkisofs genisoimage
           sudo apt-get install -y binutils
       - name: Build ISO
