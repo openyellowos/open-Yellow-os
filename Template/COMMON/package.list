@@ -148,6 +148,7 @@ libproxy1-plugin-networkmanager
 libproxy1-plugin-webkit
 librsvg2-common
 libspa-0.2-bluetooth
+libspa-0.2-jack
 linux-image-amd64
 locales-all
 #mintstick
@@ -162,14 +163,17 @@ network-manager-l2tp-gnome
 network-manager-openvpn-gnome
 neofetch
 pciutils
+pipewire-alsa
+pipewire-audio
+pipewire-audio-client-libraries
+pipewire-jack
+pipewire-pulse
 plymouth
 plymouth-themes
 poppler-data
 power-profiles-daemon
 powertop
 #printer-driver-cups-pdf
-pulseaudio
-pulseaudio-module-bluetooth
 python3
 qgnomeplatform-qt5
 qml-module-qtquick2
@@ -194,7 +198,6 @@ task-laptop
 task-japanese
 tasksel
 timeshift
-tlp
 tracker
 ufw
 usbutils
@@ -202,6 +205,7 @@ usrmerge
 vim
 #vlc
 wget
+wireplumber
 #xdg-desktop-portal-gnome
 xdg-user-dirs-gtk
 xdg-utils
@@ -212,3 +216,4 @@ xwayland
 xz-utils
 #yelp
 zenity
+
