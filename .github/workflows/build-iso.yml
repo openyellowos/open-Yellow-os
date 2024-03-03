@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Packages for Build ISO
         run: |
           sudo apt-get install -y debootstrap syslinux-utils zsync expect git xorriso mkisofs genisoimage
