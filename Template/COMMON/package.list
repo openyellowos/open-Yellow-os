@@ -194,6 +194,7 @@ system-config-printer-udev
 systemd
 #systemd-resolved
 systemd-timesyncd
+systemd-zram-generator
 task-laptop
 task-japanese
 tasksel
