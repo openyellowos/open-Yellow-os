@@ -25,9 +25,13 @@ function get_schema(path, schema) {
     if (schemaFile.query_exists(null)) {
         schemaSource = GioSSS.new_from_directory(GLib.build_filenamev([path, 'schemas']), GioSSS.get_default(), false);
     } else {
-        schemaSource = GioSSS.get_default();
+        schemaFile = Gio.File.new_for_path(GLib.build_filenamev([path, '..', 'schemas', 'gschemas.compiled']));
+        if (schemaFile.query_exists(null)) {
+            schemaSource = GioSSS.new_from_directory(GLib.build_filenamev([path, '..', 'schemas']), GioSSS.get_default(), false);
+        } else {
+            schemaSource = GioSSS.get_default();
+        }
     }
-
     let schemaObj = schemaSource.lookup(schema, true);
     if (!schemaObj) {
         throw new Error(`Schema ${schema} could not be found for extension ` + '. Please check your installation.');
@@ -139,11 +143,20 @@ function preferencesFrame(_Gtk, desktopSettings, nautilusSettings, gtkSettings) 
 function buildSwitcher(settings, key, labelText) {
     let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 10});
     let label = new Gtk.Label({label: labelText, xalign: 0});
-    let switcher = new Gtk.Switch({active: settings.get_boolean(key)});
+    if (settings) {
+        var status = settings.get_boolean(key);
+    } else {
+        var status = false;
+    }
+    let switcher = new Gtk.Switch({active: status});
     label.set_hexpand(true);
     switcher.set_hexpand(false);
     switcher.set_halign(Gtk.Align.END);
-    settings.bind(key, switcher, 'active', 3);
+    if (settings) {
+        settings.bind(key, switcher, 'active', 3);
+    } else {
+        switcher.sensitive = false;
+    }
     if (hbox.pack_start) {
         hbox.pack_start(label, true, true, 0);
         hbox.add(switcher);
@@ -164,15 +177,17 @@ function buildSwitcher(settings, key, labelText) {
 function buildSelector(settings, key, labelText, elements) {
     let listStore = new Gtk.ListStore();
     listStore.set_column_types([GObject.TYPE_STRING, GObject.TYPE_STRING]);
-    let schemaKey = settings.settings_schema.get_key(key);
-    let values = schemaKey.get_range().get_child_value(1).get_child_value(0).get_strv();
-    for (let val of values) {
-        let iter = listStore.append();
-        let visibleText = val;
-        if (visibleText in elements) {
-            visibleText = elements[visibleText];
+    if (settings) {
+        let schemaKey = settings.settings_schema.get_key(key);
+        let values = schemaKey.get_range().get_child_value(1).get_child_value(0).get_strv();
+        for (let val of values) {
+            let iter = listStore.append();
+            let visibleText = val;
+            if (visibleText in elements) {
+                visibleText = elements[visibleText];
+            }
+            listStore.set(iter, [0, 1], [visibleText, val]);
         }
-        listStore.set(iter, [0, 1], [visibleText, val]);
     }
     let hbox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 10});
     let label = new Gtk.Label({label: labelText, xalign: 0});
@@ -184,7 +199,11 @@ function buildSelector(settings, key, labelText, elements) {
     label.set_hexpand(true);
     combo.set_hexpand(false);
     combo.set_halign(Gtk.Align.END);
-    settings.bind(key, combo, 'active-id', 3);
+    if (settings) {
+        settings.bind(key, combo, 'active-id', 3);
+    } else {
+        combo.sensitive = false;
+    }
     if (hbox.pack_start) {
         hbox.pack_start(label, true, true, 0);
         hbox.add(combo);
