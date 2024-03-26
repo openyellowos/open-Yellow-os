@@ -3,8 +3,7 @@
 ############################################################################
 ##
 ##  名称：change_ui
-##  処理：引数に応じて、UIを変更する
-##  引数1：1(oYo original) 2(Windows Style)
+##  処理：UIを変更する
 ##
 ############################################################################
 
@@ -15,7 +14,7 @@
 change_ui_oYo_original() {
     ###/org/gnome/shell/###
      #お気に入りアプリケーション
-    dconf write /org/gnome/shell/favorite-apps "['firefox-esr.desktop','org.gnome.Nautilus.desktop','org.gnome.Software.desktop','org.gnome.Settings.desktop','org.gnome.Terminal.desktop']"
+    #dconf write /org/gnome/shell/favorite-apps "['firefox-esr.desktop','org.gnome.Nautilus.desktop','org.gnome.Software.desktop','org.gnome.Settings.desktop','org.gnome.Terminal.desktop']"
      #有効なExtension
     dconf write /org/gnome/shell/enabled-extensions "['dash-to-dock@micxgx.gmail.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
 
@@ -36,7 +35,7 @@ change_ui_oYo_original() {
 change_ui_windows_style() {
     ###/org/gnome/shell/###
      #お気に入りアプリケーション
-    dconf write /org/gnome/shell/favorite-apps "['firefox-esr.desktop','org.gnome.Nautilus.desktop','org.gnome.Terminal.desktop']"
+    #dconf write /org/gnome/shell/favorite-apps "['firefox-esr.desktop','org.gnome.Nautilus.desktop','org.gnome.Terminal.desktop']"
      #有効なExtension
     dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
 
@@ -56,19 +55,33 @@ change_ui_windows_style() {
 ############################################################################
 ## メイン処理
 ############################################################################
+OYO_UI="oYo Original Style"
+WINDOWS_UI="Windows UI Style"
 
-if [ "$#" -eq 1 ]; then
-    if [ "$1" -eq 1 ]; then
+VALUE=$(zenity --title "oYo UI Changer" \
+               --list \
+               --radiolist \
+               --hide-header \
+               --width 320 \
+               --height 240 \
+               --text "UIを選択して、OKボタンを押してください。" \
+               --column "select" \
+               --column "UI" FALSE "$OYO_UI" FALSE "$WINDOWS_UI")
+
+EXITCODE=$?
+if [ $EXITCODE = 0 ]; then
+    if [ "$VALUE" == "$OYO_UI" ]; then
         change_ui_oYo_original
-        echo "oYo Original UIに変更しました。"
-    elif [ "$1" -eq 2 ]; then
+        zenity --info \
+               --text="$OYO_UIに変更しました。"
+    elif [ "$VALUE" == "$WINDOWS_UI" ]; then
         change_ui_windows_style
-        echo "Windows Style UIに変更しました。"
+        zenity --info \
+               --text="$WINDOWS_UIに変更しました。"
     else
-        echo "引数は1(oYo Original UI)か2(Windows Style UI)のみ有効です。"
+        zenity --info \
+               --text="引数は「$OYO_UI」か「$WINDOWS_UI」のみ有効です。"
     fi
-else
-    echo "引数は1(oYo Original UI)か2(Windows Style UI)のみ有効です。"
+     
+    change-ui
 fi
-
-
