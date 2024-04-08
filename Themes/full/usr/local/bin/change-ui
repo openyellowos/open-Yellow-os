@@ -12,12 +12,9 @@
 ## oYo Original Style UI
 ############################################################################
 change_ui_oYo_original() {
-    ###/org/gnome/shell/###
-     #お気に入りアプリケーション
-    #dconf write /org/gnome/shell/favorite-apps "['firefox-esr.desktop','org.gnome.Nautilus.desktop','org.gnome.Software.desktop','org.gnome.Settings.desktop','org.gnome.Terminal.desktop']"
-     #有効なExtension
-    dconf write /org/gnome/shell/enabled-extensions "['dash-to-dock@micxgx.gmail.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
-
+    dconf write /org/gnome/shell disable-user-extensions false
+    dconf write /org/gnome/shell disable-user-extensions true
+    
     ###dash-to-dock###
     #/org/gnome/shell/extensions/dash-to-dock/
     dconf write /org/gnome/shell/extensions/dash-to-dock/custom-theme-shrink true
@@ -27,29 +24,81 @@ change_ui_oYo_original() {
     dconf write /org/gnome/shell/extensions/dash-to-dock/dock-position "'LEFT'"
     dconf write /org/gnome/shell/extensions/dash-to-dock/running-indicator-style "'DOTS'"
     dconf write /org/gnome/shell/extensions/dash-to-dock/transparency-mode "'DYNAMIC'"
+    
+    ###dconf write /org/gnome/desktop/wm/preferences/###     
+    dconf write /org/gnome/desktop/wm/preferences/button-layout "'appmenu:minimize,maximize,close'"
+
+     #有効なExtension
+    dconf write /org/gnome/shell/enabled-extensions "['dash-to-dock@micxgx.gmail.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
+
+
 }
 
 ############################################################################
 ## Windows Style UI
 ############################################################################
 change_ui_windows_style() {
-    ###/org/gnome/shell/###
-     #お気に入りアプリケーション
-    #dconf write /org/gnome/shell/favorite-apps "['firefox-esr.desktop','org.gnome.Nautilus.desktop','org.gnome.Terminal.desktop']"
-     #有効なExtension
-    dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
-
+    dconf write /org/gnome/shell disable-user-extensions false
+    dconf write /org/gnome/shell disable-user-extensions true
+    
     ###/org/gnome/shell/extensions/arcmenu/###
      #メニューレイアウト
     dconf write /org/gnome/shell/extensions/arcmenu/menu-layout "'Windows'"
      #パネル内の位置
     dconf write /org/gnome/shell/extensions/arcmenu/position-in-panel "'Left'"
-     #パネルサイズ
-    dconf write /org/gnome/shell/extensions/dash-to-panel/panel-sizes '{"0":36}'
-     
+
     ###/org/gnome/shell/extensions/dash-to-panel/###
-    dconf write /org/gnome/shell/extensions/dash-to-panel/panel-element-positions "'{\"0\":[{\"element\":\"showAppsButton\",\"visible\":false,\"position\":\"stackedTL\"},{\"element\":\"activitiesButton\",\"visible\":false,\"position\":\"stackedTL\"},{\"element\":\"leftBox\",\"visible\":true,\"position\":\"stackedTL\"},{\"element\":\"taskbar\",\"visible\":true,\"position\":\"stackedTL\"},{\"element\":\"centerBox\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"rightBox\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"dateMenu\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"systemMenu\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"desktopButton\",\"visible\":true,\"position\":\"stackedBR\"}]}'"
+     #パネル位置
+    dconf write /org/gnome/shell/extensions/dash-to-panel/panel-positions "'{\"0\":\"BOTTOM\"}'"
+     #パネルサイズ
+    dconf write /org/gnome/shell/extensions/dash-to-panel/panel-sizes "'{\"0\":36}'"
      
+    dconf write /org/gnome/shell/extensions/dash-to-panel/panel-element-positions "'{\"0\":[{\"element\":\"showAppsButton\",\"visible\":false,\"position\":\"stackedTL\"},{\"element\":\"activitiesButton\",\"visible\":false,\"position\":\"stackedTL\"},{\"element\":\"leftBox\",\"visible\":true,\"position\":\"stackedTL\"},{\"element\":\"taskbar\",\"visible\":true,\"position\":\"stackedTL\"},{\"element\":\"centerBox\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"rightBox\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"dateMenu\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"systemMenu\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"desktopButton\",\"visible\":true,\"position\":\"stackedBR\"}]}'"
+    
+    ###dconf write /org/gnome/desktop/wm/preferences/###     
+    dconf write /org/gnome/desktop/wm/preferences/button-layout "'appmenu:minimize,maximize,close'"
+
+     #有効なExtension
+    dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
+     
+}
+
+############################################################################
+## Mac Style UI
+############################################################################
+change_ui_mac_style() {
+    dconf write /org/gnome/shell disable-user-extensions false
+    dconf write /org/gnome/shell disable-user-extensions true
+    
+    ###/org/gnome/shell/extensions/arcmenu/###
+     #メニューレイアウト
+    #dconf write /org/gnome/shell/extensions/arcmenu/menu-layout "'Brisk'"
+     #パネル内の位置
+    #dconf write /org/gnome/shell/extensions/arcmenu/position-in-panel "'Left'"
+
+    ###dash-to-dock###
+    #/org/gnome/shell/extensions/dash-to-dock/
+    dconf write /org/gnome/shell/extensions/dash-to-dock/custom-theme-shrink true
+    dconf write /org/gnome/shell/extensions/dash-to-dock/dock-fixed false
+    dconf write /org/gnome/shell/extensions/dash-to-dock/dash-max-icon-size 38
+    dconf write /org/gnome/shell/extensions/dash-to-dock/extend-height false
+    dconf write /org/gnome/shell/extensions/dash-to-dock/dock-position "'BOTTOM'"
+    dconf write /org/gnome/shell/extensions/dash-to-dock/running-indicator-style "'DOTS'"
+    dconf write /org/gnome/shell/extensions/dash-to-dock/transparency-mode "'DYNAMIC'"
+    
+    ###/org/gnome/shell/extensions/dash-to-panel/###
+     #パネル位置
+    dconf write /org/gnome/shell/extensions/dash-to-panel/panel-positions "'{\"0\":\"TOP\"}'"
+     #パネルサイズ
+    dconf write /org/gnome/shell/extensions/dash-to-panel/panel-sizes "'{\"0\":32}'"
+    dconf write /org/gnome/shell/extensions/dash-to-panel/panel-element-positions "'{\"0\":[{\"element\":\"showAppsButton\",\"visible\":false,\"position\":\"stackedTL\"},{\"element\":\"activitiesButton\",\"visible\":false,\"position\":\"stackedTL\"},{\"element\":\"leftBox\",\"visible\":true,\"position\":\"stackedTL\"},{\"element\":\"taskbar\",\"visible\":false,\"position\":\"stackedTL\"},{\"element\":\"centerBox\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"rightBox\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"systemMenu\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"desktopButton\",\"visible\":true,\"position\":\"stackedBR\"},{\"element\":\"dateMenu\",\"visible\":true,\"position\":\"stackedBR\"}]}'"
+
+    ###dconf write /org/gnome/desktop/wm/preferences/###     
+    dconf write /org/gnome/desktop/wm/preferences/button-layout "'close,minimize,maximize:appmenu'"
+
+     #有効なExtension
+    dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com','dash-to-dock@micxgx.gmail.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
+    #dconf write /org/gnome/shell/enabled-extensions "['dash-to-dock@micxgx.gmail.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
 }
 
 ############################################################################
@@ -57,6 +106,7 @@ change_ui_windows_style() {
 ############################################################################
 OYO_UI="oYo Original Style"
 WINDOWS_UI="Windows UI Style"
+MAC_UI="Mac UI Style"
 
 VALUE=$(zenity --title "oYo UI Changer" \
                --list \
@@ -66,7 +116,7 @@ VALUE=$(zenity --title "oYo UI Changer" \
                --height 240 \
                --text "UIを選択して、OKボタンを押してください。" \
                --column "select" \
-               --column "UI" FALSE "$OYO_UI" FALSE "$WINDOWS_UI")
+               --column "UI" FALSE "$OYO_UI" FALSE "$WINDOWS_UI"  FALSE "$MAC_UI")
 
 EXITCODE=$?
 if [ $EXITCODE = 0 ]; then
@@ -78,9 +128,13 @@ if [ $EXITCODE = 0 ]; then
         change_ui_windows_style
         zenity --info \
                --text="$WINDOWS_UIに変更しました。"
+    elif [ "$VALUE" == "$MAC_UI" ]; then
+        change_ui_mac_style
+        zenity --info \
+               --text="$MAC_UIに変更しました。"
     else
         zenity --info \
-               --text="引数は「$OYO_UI」か「$WINDOWS_UI」のみ有効です。"
+               --text="「$OYO_UI」か「$WINDOWS_UI」か「$MAC_UI」を選択してください。"
     fi
      
     change-ui
