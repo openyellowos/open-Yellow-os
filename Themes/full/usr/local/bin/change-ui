@@ -12,8 +12,8 @@
 ## oYo Original Style UI
 ############################################################################
 change_ui_oYo_original() {
-    dconf write /org/gnome/shell disable-user-extensions false
-    dconf write /org/gnome/shell disable-user-extensions true
+     #拡張機能　無効化
+    dconf write /org/gnome/shell/disable-user-extensions true
     
     ###dash-to-dock###
     #/org/gnome/shell/extensions/dash-to-dock/
@@ -24,22 +24,24 @@ change_ui_oYo_original() {
     dconf write /org/gnome/shell/extensions/dash-to-dock/dock-position "'LEFT'"
     dconf write /org/gnome/shell/extensions/dash-to-dock/running-indicator-style "'DOTS'"
     dconf write /org/gnome/shell/extensions/dash-to-dock/transparency-mode "'DYNAMIC'"
-    
+    dconf write /org/gnome/shell/extensions/dash-to-panel/stockgs-keep-dash true
+     
     ###dconf write /org/gnome/desktop/wm/preferences/###     
     dconf write /org/gnome/desktop/wm/preferences/button-layout "'appmenu:minimize,maximize,close'"
 
      #有効なExtension
     dconf write /org/gnome/shell/enabled-extensions "['dash-to-dock@micxgx.gmail.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
 
-
+     #拡張機能　有効化
+    dconf write /org/gnome/shell/disable-user-extensions false
 }
 
 ############################################################################
 ## Windows Style UI
 ############################################################################
 change_ui_windows_style() {
-    dconf write /org/gnome/shell disable-user-extensions false
-    dconf write /org/gnome/shell disable-user-extensions true
+     #拡張機能　無効化
+    dconf write /org/gnome/shell/disable-user-extensions true
     
     ###/org/gnome/shell/extensions/arcmenu/###
      #メニューレイアウト
@@ -60,21 +62,23 @@ change_ui_windows_style() {
 
      #有効なExtension
     dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
-     
+
+     #拡張機能　有効化
+    dconf write /org/gnome/shell/disable-user-extensions false
 }
 
 ############################################################################
 ## Mac Style UI
 ############################################################################
 change_ui_mac_style() {
-    dconf write /org/gnome/shell disable-user-extensions false
-    dconf write /org/gnome/shell disable-user-extensions true
+     #拡張機能　無効化
+    dconf write /org/gnome/shell/disable-user-extensions true
     
     ###/org/gnome/shell/extensions/arcmenu/###
      #メニューレイアウト
-    #dconf write /org/gnome/shell/extensions/arcmenu/menu-layout "'Brisk'"
+    dconf write /org/gnome/shell/extensions/arcmenu/menu-layout "'Brisk'"
      #パネル内の位置
-    #dconf write /org/gnome/shell/extensions/arcmenu/position-in-panel "'Left'"
+    dconf write /org/gnome/shell/extensions/arcmenu/position-in-panel "'Left'"
 
     ###dash-to-dock###
     #/org/gnome/shell/extensions/dash-to-dock/
@@ -85,7 +89,8 @@ change_ui_mac_style() {
     dconf write /org/gnome/shell/extensions/dash-to-dock/dock-position "'BOTTOM'"
     dconf write /org/gnome/shell/extensions/dash-to-dock/running-indicator-style "'DOTS'"
     dconf write /org/gnome/shell/extensions/dash-to-dock/transparency-mode "'DYNAMIC'"
-    
+    dconf write /org/gnome/shell/extensions/dash-to-panel/stockgs-keep-dash true
+
     ###/org/gnome/shell/extensions/dash-to-panel/###
      #パネル位置
     dconf write /org/gnome/shell/extensions/dash-to-panel/panel-positions "'{\"0\":\"TOP\"}'"
@@ -97,8 +102,10 @@ change_ui_mac_style() {
     dconf write /org/gnome/desktop/wm/preferences/button-layout "'close,minimize,maximize:appmenu'"
 
      #有効なExtension
-    dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com','dash-to-dock@micxgx.gmail.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
-    #dconf write /org/gnome/shell/enabled-extensions "['dash-to-dock@micxgx.gmail.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
+    dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com', 'dash-to-panel@jderose9.github.com', 'add-to-desktop@tommimon.github.com', 'ding@rastersoft.com', 'kimpanel@kde.org', 'dash-to-dock@micxgx.gmail.com']"
+    
+     #拡張機能　有効化
+    dconf write /org/gnome/shell/disable-user-extensions false
 }
 
 ############################################################################
@@ -134,7 +141,7 @@ if [ $EXITCODE = 0 ]; then
                --text="$MAC_UIに変更しました。"
     else
         zenity --info \
-               --text="「$OYO_UI」か「$WINDOWS_UI」か「$MAC_UI」を選択してください。"
+               --text="引数は「$OYO_UI」か「$WINDOWS_UI」か「$MAC_UI」のみ有効です。"
     fi
      
     change-ui
