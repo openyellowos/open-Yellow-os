@@ -1,7 +1,7 @@
-PRETTY_NAME="open.Yellow.os 24.04 (Freesia) beta2.1"
+PRETTY_NAME="open.Yellow.os 24.05 (Freesia) beta2.0"
 NAME="open.Yellow.os"
-VERSION_ID="24.04"
-VERSION="24.04 (Freesia)"
+VERSION_ID="24.05"
+VERSION="24.05 (Freesia)"
 VERSION_CODENAME=bookworm
 ID=debian
 ID_LIKE=debian
