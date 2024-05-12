@@ -32,6 +32,8 @@ change_ui_oYo_original() {
 
      #有効なExtension
     dconf write /org/gnome/shell/enabled-extensions "['dash-to-dock@micxgx.gmail.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
+     #無効なEcxtension
+     dconf write /org/gnome/shell/disabled-extensions "'[]'"
 
      #拡張機能　有効化
     dconf write /org/gnome/shell/disable-user-extensions false
@@ -63,6 +65,8 @@ change_ui_windows_style() {
 
      #有効なExtension
     dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com','dash-to-panel@jderose9.github.com','add-to-desktop@tommimon.github.com','ding@rastersoft.com','kimpanel@kde.org']"
+     #無効なEcxtension
+    dconf write /org/gnome/shell/disabled-extensions "'[]'"
 
      #拡張機能　有効化
     dconf write /org/gnome/shell/disable-user-extensions false
@@ -105,6 +109,8 @@ change_ui_mac_style() {
 
      #有効なExtension
     dconf write /org/gnome/shell/enabled-extensions "['arcmenu@arcmenu.com', 'dash-to-panel@jderose9.github.com', 'add-to-desktop@tommimon.github.com', 'ding@rastersoft.com', 'kimpanel@kde.org', 'dash-to-dock@micxgx.gmail.com']"
+     #無効なEcxtension
+    dconf write /org/gnome/shell/disabled-extensions "'[]'"
     
      #拡張機能　有効化
     dconf write /org/gnome/shell/disable-user-extensions false
@@ -124,6 +130,7 @@ VALUE=$(zenity --title "oYo UI Changer" \
                --width 320 \
                --height 240 \
                --text "UIを選択して、OKボタンを押してください。" \
+               --cancel-label "閉じる" \
                --column "select" \
                --column "UI" FALSE "$OYO_UI" FALSE "$WINDOWS_UI"  FALSE "$MAC_UI")
 
@@ -143,7 +150,7 @@ if [ $EXITCODE = 0 ]; then
                --text="$MAC_UIに変更しました。"
     else
         zenity --info \
-               --text="引数は「$OYO_UI」か「$WINDOWS_UI」か「$MAC_UI」のみ有効です。"
+               --text="どれか１つを選択してください。"
     fi
      
     change-ui
