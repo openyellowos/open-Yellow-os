@@ -20,6 +20,8 @@ console-setup
 cups
 cups-pk-helper
 curl
+cryptsetup
+cryptsetup-initramfs
 dbus
 dconf-cli
 dconf-gsettings-backend
@@ -138,6 +140,7 @@ iw
 libatk-adaptor
 libcanberra-pulse
 libglib2.0-bin
+libkpmcore12
 libnss-mdns
 libnss-mymachines
 #libnss-resolve 
