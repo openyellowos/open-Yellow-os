@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=sh -c "systemctl --user restart gnome-keyring-daemon && rm ~/.config/autostart/init.desktop"
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[ja_JP]=
+Name=
+Comment[ja_JP]=
+Comment=
