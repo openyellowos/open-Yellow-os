@@ -224,7 +224,11 @@ main_wrapper() {
 
     make_nodes /dev
 
-    read_distro_release /etc/initrd-release
+    # read_distro_release /etc/initrd-release
+    local inird_release=/etc/initrd_release
+    [ -r local inird_release ] || initrd_release=/etc/initrd-release
+
+    read_distro_release $initrd_release
     : ${DISTRO_BUG_REPORT_URL:=$BUG_REPORT_URL}
     : ${DISTRO_NAME:=open.Yellow.os}
     : ${DISTRO_PRETTY_NAME:=open.Yellow.os(Freesia)}
@@ -484,6 +488,7 @@ main_core() {
     #[ "$SET_CRYPT" -a -z "$NO_CRYPT" ] && setup_crypt "$CRYPT_ID" "$BOOT_DIR/$CRYPT_FNAME" "$BOOT_MP"
 
     tsplash_progress  "$_search_for_boot_device_"
+/ventoy/busybox/sh /ventoy/hook/debian/antix-disk.sh
     breakpoint 3 "before looking for linuxfs file"
 
     RW_MODE=ro
@@ -1695,7 +1700,7 @@ next_partition() {
 
 from_filter() {
 
-    FILTERED_LIST=
+    FILTERED_LIST=/dev/mapper/ventoy
 
     local from_type invalid_scan
     case ,$FROM_TYPE, in

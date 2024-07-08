@@ -2704,7 +2704,7 @@ Version-Info
 }
 
 write_initrd_release() {
-    local dir=$1  sudo=$2  name=initrd-release
+    local dir=$1  sudo=$2  name=initrd_release
     [[ ${#dir} -eq 0 ]] && fatal "Empty directory passed to write_initrd_version()"
 
     local file1=$dir/etc/$name  file2=$dir/etc/live/version/$name
@@ -2730,7 +2730,7 @@ Initrd_Version
 
     else
         say "IF2"
-        cat << Initrd_Version | $sudo tee $dir/etc/initrd-release
+        cat << Initrd_Version | $sudo tee $dir/etc/initrd_release
 NAME="$DISTRO_NAME"
 VERSION="$DISTRO_VERSION ($CODE_NAME)"
 ID="$(echo $DISTRO_NAME | tr 'A-Z' 'a-z')"
