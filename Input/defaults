@@ -13,14 +13,13 @@ CODE_NAME="Freesia"
 ASCII_CODE_NAME="Freesia"
 DEBIAN_RELEASE="bookworm"
 DISTRO_NAME="open.Yellow.os"
-DISTRO_VERSION="24.06"
+DISTRO_VERSION="24.08"
 HOME_URL="https://openyellowos.com/"
 
 #Kernel templates...comment and uncomment depending on what you are building
 #V is K_version of kernel
 #G not actually used
 #R is K_Revision
-#A is architecture.
 #Note that the templates don't use all values.
 
 #standard 64 bit
@@ -34,7 +33,7 @@ LIVE_USER="demo"
 LOCALE="ja_JP.UTF-8"
 MIRROR="jp"
 NEW_HOSTNAME="oYo"
-RELEASE_DATE="June 2, 2024"
+RELEASE_DATE="August 2, 2024"
 TIME_ZONE="Asia/Tokyo"
 ENABLE_LOCALES="Default"
 CURSOR_ICON_THEME="/usr/share/icons/Adwaita/cursor.theme"
