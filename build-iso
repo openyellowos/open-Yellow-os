@@ -332,11 +332,9 @@ main() {
 
         # Variables derived from output files
         local full_distro_name=$DISTRO_NAME-${DISTRO_VERSION}_$ISO_ARCH
-#        [[ $DISTRO_NAME = antiX ]] && full_distro_name=$full_distro_name-$ISO_FLAV
 
         local fancy_name="$full_distro_name $CODE_NAME $RELEASE_DATE"
         local work_name=$DISTRO_NAME-${DISTRO_VERSION}-$ISO_ARCH-$DEBIAN_RELEASE
-#        [[ $DISTRO_NAME = antiX ]] && work_name=$work_name-$ISO_FLAV
         local work_dir=$remaster_dir/work/$work_name
         local iso_dir=$work_dir/iso
         local sqfs_dir=$work_dir/squashfs
@@ -870,10 +868,7 @@ do_stage_4() {
         skip_part 2 "Search for complete kernel name"
     fi
 
-# UPD localeを変更 TOSHIO 2022.05.28 START
     : ${LOCALE:=ja_JP.UTF-8}
-#    : ${LOCALE:=en_US.UTF-8}
-# UPD localeを変更 TOSHIO 2022.05.28 END
      
     if do_part 3 "!Define locales"; then
         case $ENABLE_LOCALES in
@@ -910,10 +905,7 @@ do_stage_4() {
     fi
 
     if do_part 6 "Update locales"; then
-    # UPD localeを変更 TOSHIO 2022.05.28 START
     : ${LOCALE:=ja_JP.UTF-8}
-    #    : ${LOCALE:=en_US.UTF-8}
-    # UPD localeを変更 TOSHIO 2022.05.28 END
         say "Set default locale to $(pq $LOCALE)"
         update-locale LANG=$LOCALE
         end_part_lax
@@ -1019,11 +1011,6 @@ do_stage_4() {
     if which $update_flash 2>/dev/null && do_part 15 "Get Latest Flash"; then
         $update_flash
 
-        #local flash_selector="flashplayer-selector.sh"
-        #if [[ $ARCH = "i386" ]] && which $flash_selector 2>/dev/null; then
-        #   say "Set old flash"
-        #   $flash_selector
-        #fi
         end_part_lax
     fi
 
@@ -1104,12 +1091,10 @@ do_stage_4() {
             local user_pw=$(mkpasswd -m sha-512 $user)
             useradd -s ${ISO_SHELL:="/bin/bash"} -g $user -d /home/$user -p $user_pw $user
 
-             # ADD 「User:DEMO」を「Group：Wheel」に追加 TOSHIO 2022.05.28 START
              # liveユーザーに管理者権限を付与
              addgroup wheel
              usermod -aG wheel demo
-             # ADD 「User:DEMO」を「Group：Wheel」に追加 TOSHIO 2022.05.28 END
-             #システムログを参照するためにDEMOユーザーを「Group：systemd-journal」に追加
+                 #システムログを参照するためにDEMOユーザーを「Group：systemd-journal」に追加
              usermod -aG systemd-journal demo
         fi
 
@@ -2267,49 +2252,6 @@ search_for_k_name() {
     say "Found kernel $(pq $K_NAME)"
 }
 
-vmlinuz_gcc_version() {
-    local vmlinuz=$1
-    $tools/extract-vmlinux $vmlinuz  2>/dev/null | strings \
-        | sed -n -r '/gcc version/ s/.*gcc version ([0-9.]+).*/\1/p' | head -n 1
-}
-
-check_kernel_gcc() {
-    local kernel=vmlinuz-$K_NAME
-    local vmlinuz=$sqfs_dir/boot/$kernel
-    [[ ! -r $vmlinuz ]] \
-        && error "Could not find kernel file: $(pqw $kernel)" && return
-
-    local kgcc=gcc-$(vmlinuz_gcc_version $vmlinuz)
-
-    [[ $kgcc = gcc- ]] \
-        && error "Could not find gcc version for $(pqw $kernel)" && return
-
-    say "Kernel $(pq $K_NAME) was compiled with $(pq $kgcc)"
-
-    local kalt=$(echo $kgcc | sed -n -r 's/([0-9]+\.[0-9]+)\.[0-9]+$/\1/p')
-    local gcc
-
-    for gcc in $kgcc $kalt; do
-        [[  -e $sqfs_dir/usr/bin/$gcc ]] || continue
-        say "Found $(pq $gcc) on system"
-        return 0
-    done
-    error "Could not find these versions of gcc: $(pq $kgcc $kalt)"
-}
-
-customize_firefox() {
-    local pref_files file lang=${1%%.*}
-    local string="user_pref(\"spellchecker.dictionary\","
-
-    pref_files=$(ls $firefox_prefs 2>/dev/null)
-    [[ -n $pref_files ]] || return
-    sed -i "/$string/d" $pref_files
-    sed -i '/"extensions.lastAppVersion"/ d' $pref_files
-    for file in $pref_files; do
-        echo "$string \"$lang\");" >> $file
-    done
-}
-
 apt_get_packages() {
     local file=$1  label=$2
     shift 2
@@ -2382,29 +2324,6 @@ gather_deb() {
             basename $f | grep -q -- $filt_flav && continue
             echo $f
         done
-    done
-}
-
-collect_live_files() {
-    local list_file=$1 dest_dir=$sqfs_dir$2
-    test -r $list_file || return
-    echo "Collecting Live-files"
-    local list=$(cat $list_file | grep -v "^\s*#\s*" | sed 's/\s*#.*//' \
-        | grep "^/" | sed "s=^=$sqfs_dir=")
-    #echo "$list"
-
-    $SUDO mkdir -p $dest_dir
-    # This hard-codes the live-files dir but it is safer in case
-    # $dest_dir is empty.
-    $SUDO rm -rf $(dirname $dest_dir)/live-files/*
-
-    local file dest
-    for file in $list; do
-        test -e $file || continue
-        dest_file=${file#$sqfs_dir}
-        dest=$dest_dir$dest_file
-        $SUDO mkdir -p $(dirname $dest)
-        $SUDO cp -a $file $dest
     done
 }
 
@@ -2613,45 +2532,6 @@ Initrd_Version
 
 utf8_to_ascii() {
     iconv -f utf-8 -t ascii//translit
-}
-
-busybox_depmod() {
-    local targ=$1  kernel=$2  cmd=${3:-depmod}
-
-    local mod_dir=$targ/lib/modules
-    local k_dir=$mod_dir/$kernel
-    local to_delete
-
-    [[ -d $targ ]]             || fatal "Target $targ is not a directory"
-    [[ -x $targ/bin/busybox ]] || fatal "Could not find /bin/busybox"
-    [[ -x $targ/bin/$cmd ]]    || fatal "Could not find /bin/$cmd"
-    [[ -d $mod_dir ]]          || fatal "Could not find /lib/modules"
-    [[ -d $k_dir ]]            || fatal "Could not find $k_dir"
-
-    local proc_dir=$targ/proc
-    if ! [[ -e $proc_dir ]]; then
-        mkdir $proc_dir
-        to_delete="$proc_dir $to_delete"
-    fi
-
-    touch $proc_dir/modules
-
-    fake_dir=$mod_dir/$(uname -r)
-    if [[ $fake_dir != $k_dir ]]; then
-        ln -s $kernel $fake_dir || error "Error creating $fake_dir symlink"
-        to_delete="$fake_dir $to_delete"
-    fi
-
-    $SUDO chroot $targ /bin/depmod
-    for file in $to_delete; do
-        echo "delete $file"
-        rm -r $file
-    done
-
-    depmod_file=$k_dir/modules.dep.bb
-    [[ -e $depmod_file ]] || error "The modules.dep.bb file was not created"
-
-    $SUDO chown $USER $depmod_file
 }
 
 #==============================================================================
@@ -2939,12 +2819,6 @@ cprint_left() {
     printf "%s%${pad}s" "$str" ""
 }
 
-cprint_right() {
-    local width=$1 str=$2
-    local pad=$((width - $(str_len "$str")))
-    printf "%${pad}s%s" "" "$str"
-}
-
 str_len() {
     local msg_nc=$(echo "$*" | sed -r -e 's/\x1b\[[0-9;]+[mK]//g' -e 's/./x/g')
     echo ${#msg_nc}
@@ -3002,7 +2876,6 @@ elapsed() {
 create_cache()  { _cache_ create  "$@"; }
 force_cache()   { _cache_ force   "$@"; }
 restore_cache() { _cache_ restore "$@"; }
-was_cached()    { _cache_ was     "$@"; }
 
 _cache_() {
     local ctype=$1; shift
@@ -3878,20 +3751,6 @@ zsyncmake_file() {
 }
 
 #------------------------------------------------------------------------------
-#
-#------------------------------------------------------------------------------
-make_real() {
-    local file=$1
-    test -L $file || return
-    local dest=$(readlink -f $file)
-    test -f "$dest" || return
-    say "Convert symlink $file to a real file"
-    local tmp=$(mktemp $file.XXXXXXXX)
-    cp $dest $tmp
-    mv $tmp $file
-}
-
-#------------------------------------------------------------------------------
 # Distro based check of flavour name
 #------------------------------------------------------------------------------
 is_distro_flav() {
@@ -3924,21 +3783,6 @@ update_template_file() {
         [[ -e $dir/$old ]] || continue
         say "Moving $(pq $old) to $(pq $new) in Template/$(basename $dir)"
         mv $dir/$old $dir/$new
-    done
-}
-
-update_list_names() {
-    local list=$(find Template -name "*-list")
-    [[ -n $list ]] || return;
-    echo "Rename *-list file names to *.list"
-
-    YES_no_loud "Rename these files?" || vexit "Must update to continue"
-
-    for old in $list; do
-        new=$(echo $old | sed 's/-list$/.list/')
-        [[ -n $new ]] || next
-        echo "Renaming $old"
-        mv $old $new
     done
 }
 
