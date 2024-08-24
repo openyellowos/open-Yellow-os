@@ -207,8 +207,6 @@ main() {
         esac
     done
 
-#    is_antiX && apt_yes=
-
     if [[ $# -eq 1  && -z $start_from ]]; then
         arg=$1; shift
         case $arg in
@@ -528,7 +526,7 @@ Remaster_Blurb
     is_distro_flav $ISO_RESPIN_OF || fatal "Invalid flavour to base respin on: $ISO_RESPIN_OF"
 
     local distro_k_arch=686
-#    is_antiX && distro_k_arch=486
+
     case $ARCH in
          i386) K_ARCH=$distro_k_arch   ; ISO_ARCH=386  ;;
         amd64) K_ARCH=amd64            ; ISO_ARCH=x64  ;;
@@ -656,13 +654,6 @@ do_stage_2() {
         $SUDO debootstrap $args $DEBIAN_RELEASE $sqfs_dir $url
         end_timer "run debootstrap $ARCH $DEBIAN_RELEASE"
         check_errors_lax
-
-        ##anticapitalista - remove systemd from 4 files in /etc
-#        if is_antiX; then
-#            say "removing systemd from 4 files"
-#            $SUDO sed -i '/^systemd/d' $sqfs_dir/etc/{group,gshadow,passwd,shadow}
-#            say "de-systemd complete"
-#        fi
 
         umount_chroot
 
@@ -847,13 +838,11 @@ do_stage_4() {
         skip_part 0 "Read PARTIAL file to skip parts done"
     fi
 
-#    if ! is_antiX; then
-        local early_deb
-        for early_deb in $(ls /*.deb 2>/dev/null); do
-            say "Install deb package $(pq $early_deb)"
-            dpkg -i $early_deb && rm $early_deb
-        done
-#    fi
+    local early_deb
+    for early_deb in $(ls /*.deb 2>/dev/null); do
+        say "Install deb package $(pq $early_deb)"
+        dpkg -i $early_deb && rm $early_deb
+    done
 
     # for 64 bit set multiarch
     # 64ビットセットマルチアーチ用
@@ -916,7 +905,6 @@ do_stage_4() {
     if do_part 5 "Install kernel & headers"; then
         local kname=linux-image-$K_NAME
         kname=$kname$UNSIGNED
-#        ! is_antiX && kname=$kname$UNSIGNED
         apt-get $APT_GET_OPTS install linux-headers-$K_NAME $kname
         end_part_strict
     fi
@@ -1014,14 +1002,6 @@ do_stage_4() {
 
     if [[ -e $CURSOR_ICON_THEME ]]; then
         say "Set cursor icon theme to $(pq $CURSOR_ICON_THEME)"
-#        if is_antiX; then
-#            local theme dir
-#            for theme in oxy-white oxy-black Breeze-Snow Breeze-Amber; do
-#                dir=/usr/share/icons/$theme
-#                test -d "$dir" || continue
-#                update-alternatives --install /usr/share/icons/default/index.theme x-cursor-theme "$dir"/index.theme 20
-#            done
-#        fi
         update-alternatives --set x-cursor-theme $CURSOR_ICON_THEME
     else
         error "Missing or unknown cursor icon theme $(pqw $CURSOR_ICON_THEME)"
@@ -1053,18 +1033,7 @@ do_stage_4() {
         mv $udev_file.live $udev_file.rules
     fi
 
-#    if is_antiX; then
-#        #update icons cache files
-#        local update_icons="gtk-update-icon-cache"
-#        local icon_folder="/usr/share/icons"
-#        say "Updating icons cache"
-#        #$update_icons $icon_folder/elementaryXubuntu-dark
-#        $update_icons $icon_folder/Faenza
-#        $update_icons $icon_folder/papirus-antix
-#        #$update_icons $icon_folder/Faenza-Cupertino-mini
-#    else
-        update-icon-caches /usr/share/icons/*
-#    fi
+    update-icon-caches /usr/share/icons/*
 
     if [[ -n $interactive ]] &&  do_part 16 "Manual configuration"; then
 
@@ -1149,7 +1118,6 @@ do_stage_4() {
         # add conveinence group vboxsf even if virtualbox guest additions
         # aren not installed
         ! grep -q vboxsf /etc/group && groupadd vboxsf
-#        ! is_antiX && ! grep -q vboxsf /etc/group && groupadd vboxsf
 
         local group
         for group in $(gather user-groups); do
@@ -1164,12 +1132,6 @@ do_stage_4() {
     fi
 
     if do_part 18 "Run second apt-get -f install"; then
-
-#        if [[ $DEBIAN_RELEASE != "wheezy" ]] && is_antiX; then
-#            apt-get $APT_GET_OPTS purge systemd libsystemd0 udev software-properties-common software-properties-gtk
-#            apt-get $APT_GET_OPTS install --reinstall eudev
-#            update-rc.d udev defaults
-#        fi
 
         apt-get -f $apt_yes install
         # Remove unwanted apps that may have sneaked in.
@@ -1207,36 +1169,20 @@ do_stage_4() {
         skip_part 19 "Update SLiM defaults"
     fi
 
-#    if is_antiX; then
-#        say "Customize Mozilla Browser"
-#        customize_firefox $LOCALE
-#    else
-        # UPD localtimeを日本に変更 TOSHIO 2022.05.28 START
-        ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
-        #ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-        # UPD localtimeを日本に変更 TOSHIO 2022.05.28 END
-#    fi
+    ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
     _say_
     say "Write version files"
     write_version_files
 
-#    if ! is_antiX; then
-        mv /etc/antix-version /etc/mx-version
-        ln -frs /etc/mx-version /etc/antix-version
+    mv /etc/antix-version /etc/mx-version
+    ln -frs /etc/mx-version /etc/antix-version
 
-        ##fix at-spi-dbus.desktop startup sequence
-        if [ -e /etc/xdg/autostart/at-spi-dbus-bus.desktop ]; then
-            cp /etc/xdg/autostart/at-spi-dbus-bus.desktop /etc/xdg/autostart/zz-at-spi-dbus-bus.desktop
-            rm /etc/xdg/autostart/at-spi-dbus-bus.desktop
-        fi
-
-        ##mask cgmanager.service - not needed for systemd and masking won't prevent sysVinit from using it.
-        # DEL 無効化 TOSHIO 2022.05.22 START
-        #systemctl mask cgmanager.service
-        # DEL 無効化 2022.05.22 END
-
-#    fi
+    ##fix at-spi-dbus.desktop startup sequence
+    if [ -e /etc/xdg/autostart/at-spi-dbus-bus.desktop ]; then
+        cp /etc/xdg/autostart/at-spi-dbus-bus.desktop /etc/xdg/autostart/zz-at-spi-dbus-bus.desktop
+        rm /etc/xdg/autostart/at-spi-dbus-bus.desktop
+    fi
 
     mkdir -p /usr/share/antiX
 
@@ -1250,30 +1196,25 @@ do_stage_4() {
         check_errors_reset
         end_part_strict
     fi
-    #-----------------------------------------------------------------
- #   if ! is_antiX; then
-        # fix debian frontend
-        say "Configure debconf interface:"
-        case $(dpkg-query -f '${db:Status-Abbrev}' -W  debconf-kde-helper 2>/dev/null) in
-           i*)
-             say "Set debconf frontend: Kde"
-             debconf-set-selections < <(printf "debconf\tdebconf/frontend\tselect\tKde\n")
-             ;;
-           *)
-             say "Set debconf frontend: Gnome"
-             debconf-set-selections < <(printf "debconf\tdebconf/frontend\tselect\tGnome\n")
-             ;;
-        esac
-#    fi
-    #-----------------------------------------------------------------
+
+    # fix debian frontend
+    say "Configure debconf interface:"
+    case $(dpkg-query -f '${db:Status-Abbrev}' -W  debconf-kde-helper 2>/dev/null) in
+       i*)
+         say "Set debconf frontend: Kde"
+         debconf-set-selections < <(printf "debconf\tdebconf/frontend\tselect\tKde\n")
+         ;;
+         *)
+         say "Set debconf frontend: Gnome"
+         debconf-set-selections < <(printf "debconf\tdebconf/frontend\tselect\tGnome\n")
+         ;;
+    esac
 
     local partial_dir=/var/cache/apt/archives/partial
     say "Fix $(pq $partial_dir) directory"
     mkdir -p $partial_dir
     chown _apt:root -R $partial_dir
     chmod 700 $partial_dir
-
- #   if ! is_antiX; then
 
     say "fix apparmor profile for smbd"
         if [ -e /etc/apparmor.d/samba/smbd-shares ]; then
@@ -1282,7 +1223,6 @@ do_stage_4() {
             [[ -d /etc/apparmor.d/samba ]] || mkdir -p /etc/apparmor.d/samba
             touch /etc/apparmor.d/samba/smbd-shares
         fi
-#    fi
 
      #----------------------------
      #コマンド実行
@@ -1377,11 +1317,6 @@ do_stage_5() {
 
     sleep 2
 
-#    if is_antiX && do_part 21 "!Check kernel's GCC version"; then
-#        check_kernel_gcc vmlinuz-$K_NAME
-#        end_part_strict
-#    fi
-
     if [[ $FLAV = "base" ]]; then
         say "Change fluxbox and icewm menu-applications files"
         sudo mv -f $sqfs_dir/usr/share/desktop-menu/.fluxbox/menu-applications-fb $sqfs_dir/usr/share/desktop-menu/.fluxbox/menu-applications
@@ -1395,36 +1330,6 @@ do_stage_5() {
         [[ -e $f ]] && $SUDO chown 1000:1000 $f
     done
 
-#    if is_antiX; then
-#        say "Change permissions for 2 ppp files"
-#        $SUDO chmod 666 $sqfs_dir/etc/ppp/chap-secrets
-#        $SUDO chmod 666 $sqfs_dir/etc/ppp/pap-secrets
-#
-#         #say "Disable exec for 2 icewm files"
-#         #$SUDO chmod 644 $sqfs_dir/usr/bin/icewmbg
-#         #$SUDO chmod 644 $sqfs_dir/usr/bin/icewm-menu-fdo
-#
-#        if [[ $DEBIAN_RELEASE != "wheezy" && -z "$jbb_mode" ]] && is_antiX; then
-#            say "Compress /usr/share/doc then delete folder"
-#            tar -jcvf doc-$full_distro_name.tar.bz2 -C / ${sqfs_dir#/}/usr/share/doc
-#            sleep 1
-#            $SUDO find $sqfs_dir/usr/share/doc -type f -name "*.gz" -delete
-#            $SUDO find $sqfs_dir/usr/lib -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/gdebi/GDebi/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/python3 -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/python3/debpython -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/python3/__pycache__  -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/python3/debpython/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/streamlink/streamlink_cli/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/streamlink/streamlink_cli/utils/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/streamtuner2/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/streamtuner2/bundle/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/streamtuner2/channels/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/system-config-printer/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/system-config-printer/troubleshoot/__pycache__ -type f -name "*.pyc" -delete
-#            $SUDO find $sqfs_dir/usr/share/system-config-printer/xml/__pycache__ -type f -name "*.pyc" -delete
-#        fi
-#    fi
 
 #    say "Write initrd-release file"
     say "write_initrd_release1 $sqfs_dir $SUDO"
@@ -1453,32 +1358,6 @@ do_stage_5() {
 
     say "Customize configuration"
     copy_template_dir -o custom-config-files $sqfs_dir
-
-#    if is_antiX; then
-#        say "Add folders for sane"
-#        $SUDO mkdir $sqfs_dir/usr/lib/sane
-#        sleep 1
-#        $SUDO mkdir $sqfs_dir/usr/lib64/sane
-#
-#        #collect_live_files $live_files_list /usr/local/share/live-files
-#        say "Save Live files for snapshot"
-#
-#        $SUDO rm -rf $sqfs_dir/usr/local/share/live-files
-#        $SUDO $tools/installed-to-live populate-live-files $sqfs_dir $sqfs_dir
-#
-#        if [[ $FLAV = "core" ]] && is_antiX; then
-#            local if_file=$sqfs_dir/etc/network/interfaces
-#            if ! grep -q eth0 $if_file; then
-#                say "Adding eth0 entry to $(pq ${if_file#$sqfs_dir})"
-#                cat <<Eth0_entry | $SUDO tee -a $if_file >/dev/null#
-#
-## The primary network interface
-#allow-hotplug eth0
-#iface eth0 inet dhcp
-#Eth0_entry
-#            fi
-#        fi
-#    fi
 
     local cached=$sqfs_dir/etc/console-setup/cached_setup_keyboard.sh
     if test -e $cached; then
@@ -1511,10 +1390,6 @@ do_stage_5() {
 
     local cdrecord_bin=$sqfs_dir/usr/bin/cdrecord
     local wodim_bin=$sqfs_dir/usr/bin/wodim
-#    if is_antiX && [[ -x $wodim_bin && ! -e $cdrecord_bin ]]; then
-#        say "Making /usr/bin/cdrecord symlink to wodim"
-#        $SUDO ln -s wodim $cdrecord_bin
-#    fi
 
     local cli_cc_prog=antiX-cli-cc
     if test -x $sqfs_dir/usr/local/bin/$cli_cc_prog; then
@@ -1533,15 +1408,14 @@ do_stage_5() {
         $SUDO rm -f $sqfs_dir/root/.bash_history
     fi
 
-#    if ! is_antiX; then
-        #remove symlink for /etc/resolv.conf
-        say "Removing symlink for /etc/resolv.conf"
-        $SUDO rm -f $sqfs_dir/etc/resolv.conf
+    #remove symlink for /etc/resolv.conf
+    say "Removing symlink for /etc/resolv.conf"
+    $SUDO rm -f $sqfs_dir/etc/resolv.conf
 
-        #remove old linux image files
-        say "Removing *.old files from / "
-        $SUDO rm -f $sqfs_dir/*.old
-#    fi
+    #remove old linux image files
+    say "Removing *.old files from / "
+    $SUDO rm -f $sqfs_dir/*.old
+
 
     leave_stage
 }
@@ -1700,7 +1574,6 @@ Bootloader_Data
     say "write_initrd_release2 $initrd_dir"
     write_initrd_release $initrd_dir
 
-#    is_antiX && initrd_encrypt="--encrypt"
 
     if [[ -z $iso_only ]]; then
         say "Copy $(pq $K_NAME) modules into initrd"
@@ -1765,14 +1638,12 @@ do_stage_7() {
     say "Update font cache"
     $SUDO chroot $sqfs_dir fc-cache -r -s -v
 
-#    if ! is_antiX; then
-        $SUDO chroot $sqfs_dir fc-cache -r -v /usr/share/fonts/extra
-        [[ -d $sqfs_dir/etc/skel/.cache/fontconfig ]] || \
-            $SUDO mkdir -p $sqfs_dir/etc/skel/.cache/fontconfig
+     $SUDO chroot $sqfs_dir fc-cache -r -v /usr/share/fonts/extra
+     [[ -d $sqfs_dir/etc/skel/.cache/fontconfig ]] || \
+         $SUDO mkdir -p $sqfs_dir/etc/skel/.cache/fontconfig
 
-        $SUDO rm -f $sqfs_dir/etc/skel/.cache/fontconfig/*
-        $SUDO cp $sqfs_dir/var/cache/fontconfig/* $sqfs_dir/etc/skel/.cache/fontconfig/
-#    fi
+     $SUDO rm -f $sqfs_dir/etc/skel/.cache/fontconfig/*
+     $SUDO cp $sqfs_dir/var/cache/fontconfig/* $sqfs_dir/etc/skel/.cache/fontconfig/
 
     if  [[ -n $zstd_override ]]; then
         COMPRESSION_TYPE="zstd"
@@ -1860,20 +1731,12 @@ do_stage_8() {
         say "Sign $(basename $full_iso_file)"
         rm -f $full_iso_file.sig 2>/dev/null
         local gpg_sudo
-#        is_antiX && gpg_sudo=$SUDO
         $gpg_sudo gpg --output $full_iso_file.sig --detach-sign $full_iso_file
     fi
 
     md5sum_file $full_iso_file
     sha256sum_file $full_iso_file
     zsyncmake_file $full_iso_file
-
-
-#    if is_antiX && [[ -L "$ISO_SYMLINK" ]];then
-#        say
-#        say "Create symlink $(pq $ISO_SYMLINK) to iso file"
-#        ln -sf $full_iso_file $ISO_SYMLINK
-#    fi
 
     say2 "Your live $(pq $iso_file) is in $(pq Remaster/iso-files) ready to be tested"
 
@@ -2111,7 +1974,6 @@ kill_chroot_procs() {
 
     YES_no "Kill these processes" || return
     $SUDO kill $pids
-    #FIXME check for survivors
 }
 #==============================================================================
 # Error detection on STDERR output
@@ -2858,7 +2720,6 @@ prep_chroot() {
     [[ -e $sqfs_dir/Build ]] || make_build_dir
 
     if [[ ! -f $sqfs_dir/etc/resolv.conf ]]; then
-#    if ! is_antiX && [[ ! -f $sqfs_dir/etc/resolv.conf ]]; then
         $SUDO cp -H /etc/resolv.conf $sqfs_dir/etc/resolv.conf
     fi
 
@@ -3666,7 +3527,6 @@ do_pretend() {
 
 do_stats() {
     local flavs="mx32 mx64 mxahs mxkde"
-#   is_antiX && flavs="core base full"
     for FLAV in $flavs; do
         ISO_RESPIN_OF=$FLAV
         yell "\n$FLAV$high_co:"
@@ -3675,7 +3535,6 @@ do_stats() {
 
     local regex="core|base|full"
     regex="$regex|mx32|mx64|mxahs|mxkd"
-#    ! is_antiX && regex="$regex|mx32|mx64|mxahs|mxkd"
     for FLAV in $(flavour_list | egrep -v "^($regex)$"); do
         for ISO_RESPIN_OF in core full; do
             yell "\n$FLAV/$ISO_RESPIN_OF$high_co:"
@@ -3757,16 +3616,14 @@ on_exit() {
 
     et=$((-$MAIN_T + $(date +%s)))
     if test $et -ge 30; then
-    #if [[ -n $STAGE_1_T && -n $STAGE_6_T ]]; then
         _end_timer_ MAIN_T "$ME $ARCH $FLAV"
     fi
-    #else
+
     if [[ -r $sign_off_file ]]; then
         SIGN_OFF=$(cat $sign_off_file 2>/dev/null)
         rm -f $sign_off_file
     fi
     _say_ "$SIGN_OFF"
-    #fi
 }
 
 #------------------------------------------------------------------------------
@@ -4035,28 +3892,11 @@ make_real() {
 }
 
 #------------------------------------------------------------------------------
-# Is this an antiX iso?
-#------------------------------------------------------------------------------
-#is_antiX() { [[ $DISTRO_NAME = "antiX" ]] ; return $? ; }
-
-#------------------------------------------------------------------------------
 # Distro based check of flavour name
 #------------------------------------------------------------------------------
 is_distro_flav() {
     local flav=$1
-#    if is_antiX; then
-#        case $flav in
-#            base|core|full) return 0 ;;
-#        esac
-#        return 1
-#    fi
-    #
     return 0
-
-    #case $flav in
-    #     mx32|mx64|mxahs|mxkde|mxbase64|mxbase32|mxflux32|mxflux64|mxworkbench32|mxworkbench64) return 0 ;;
-    #esac
-    #return 1
 }
 
 #==============================================================================
