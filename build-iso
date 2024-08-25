@@ -1302,9 +1302,6 @@ do_stage_5() {
 
     sleep 2
 
-#    say "Write initrd-release file"
-#    say "write_initrd_release1 $sqfs_dir $SUDO"
-#    write_initrd_release $sqfs_dir $SUDO
      say "write_release $sqfs_dir $SUDO"
      write_release $sqfs_dir $SUDO
 
@@ -1543,10 +1540,7 @@ Bootloader_Data
         error "No $initrd_src/ or $initrd_src.gz found"
     fi
 
-#    say "Write initrd-release file"
-#    say "write_initrd_release2 $initrd_dir"
-#    write_initrd_release $initrd_dir
-#    say "write_release $initrd_dir"
+     say "write_release $initrd_dir"
      write_release $initrd_dir
 
     if [[ -z $iso_only ]]; then
@@ -2495,53 +2489,6 @@ Initrd_Version
     $sudo mv $dir/etc/initrd_release $dir/usr/share/openyellowos/os-release
 
 }
-#write_initrd_release() {
-#    local dir=$1  sudo=$2  name=initrd_release
-#    [[ ${#dir} -eq 0 ]] && fatal "Empty directory passed to write_initrd_version()"$
-#
-#    local file1=$dir/etc/$name  file2=$dir/etc/live/version/$name
-#    $sudo mkdir -p $(dirname $file1) $(dirname $file2)
-#
-#    : ${ASCII_CODE_NAME:=$(echo $CODE_NAME | utf8_to_ascii)}
-#
-#    if [[ $ASCII_CODE_NAME != $CODE_NAME ]]; then
-#        say "IF1 $file1"
-#
-#        cat << Initrd_Version | $sudo tee $file1
-#NAME="$DISTRO_NAME"
-#VERSION="$DISTRO_VERSION ($CODE_NAME)"
-#ASCII_VERSION="$DISTRO_VERSION ($ASCII_CODE_NAME)"
-#ID="$(echo $DISTRO_NAME | tr 'A-Z' 'a-z')"
-#VERSION_ID="$(echo $DISTRO_VERSION | sed -r 's/^([0-9._-]+).*/\1/')"
-#PRETTY_NAME="$DISTRO_NAME $DISTRO_VERSION ($CODE_NAME)"
-#ASCII_PRETTY_NAME="$DISTRO_NAME $DISTRO_VERSION ($ASCII_CODE_NAME)"
-#ANSI_COLOR="0;34"
-#HOME_URL="$HOME_URL"
-#BUG_REPORT_URL="$BUG_REPORT_URL"
-#Initrd_Version
-
-#    else
-#        say "IF2"
-#        cat << Initrd_Version | $sudo tee $dir/etc/initrd_release
-#NAME="$DISTRO_NAME"
-#VERSION="$DISTRO_VERSION ($CODE_NAME)"
-#ID="$(echo $DISTRO_NAME | tr 'A-Z' 'a-z')"
-#VERSION_ID="$(echo $DISTRO_VERSION | sed -r 's/^([0-9._-]+).*/\1/')"
-#PRETTY_NAME="$DISTRO_NAME $DISTRO_VERSION ($CODE_NAME)"
-#ANSI_COLOR="0;34"
-#HOME_URL="$HOME_URL"
-#BUG_REPORT_URL="$BUG_REPORT_URL"
-#Initrd_Version
-#
-#    fi
-#
-#    say "cp $file1 $file2" 
-#    $sudo mv $file1 $file2
-#}
-
-#utf8_to_ascii() {
-#    iconv -f utf-8 -t ascii//translit
-#}
 
 #==============================================================================
 # Chroot related routines
