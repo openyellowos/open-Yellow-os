@@ -134,6 +134,8 @@ main() {
 
     local short_stack="aAcCdDefFhiIjmnNpqrsuUvV0-8"
 
+    local release_date=$(LC_TIME=en_US.UTF-8 date +"%B %d, %Y")
+
     # Need the leading space to prevent echo from swallowing -e or -E
     local arg val ARGS=$(echo " $*")
     while [[ $# -gt 0 && $1 =~ ^- ]]; do
@@ -333,7 +335,7 @@ main() {
         # Variables derived from output files
         local full_distro_name=$DISTRO_NAME-${DISTRO_VERSION}_$ISO_ARCH
 
-        local fancy_name="$full_distro_name $CODE_NAME $RELEASE_DATE"
+        local fancy_name="$full_distro_name $CODE_NAME $date_today"
         local work_name=$DISTRO_NAME-${DISTRO_VERSION}-$ISO_ARCH-$DEBIAN_RELEASE
         local work_dir=$remaster_dir/work/$work_name
         local iso_dir=$work_dir/iso
@@ -571,7 +573,7 @@ ISO_ARCH="$ISO_ARCH"
 ISO_FLAV="$ISO_FLAV"
 K_NAME="$K_NAME"
 MAKE_ISO="$MAKE_ISO"
-RELEASE_DATE="$RELEASE_DATE"
+RELEASE_DATE="$date_today"
 RESPIN_INHERIT="$RESPIN_INHERIT"
 THEME="$THEME"
 ISO_RESPIN_OF="$ISO_RESPIN_OF"
@@ -1445,7 +1447,7 @@ do_stage_6() {
              FLAV="$FLAV"
           OPTIONS="$boot_options"
      CORE_OPTIONS="$CORE_LIVE_BOOT_OPTIONS"
-     RELEASE_DATE="$RELEASE_DATE"
+     RELEASE_DATE="$date_today"
 Bootloader_Data
 
     $SUDO mkdir -p $sqfs_dir/usr/share/antiX/
@@ -2464,7 +2466,7 @@ Version:$DISTRO_VERSION
 antiX flavour:$ISO_FLAV
 Kernel:$K_NAME
 Code name:$CODE_NAME
-Release date:$RELEASE_DATE
+Release date:$date_today
 Made by:$ME version $VERSION ($VERSION_DATE)
 Version-Info
 }
