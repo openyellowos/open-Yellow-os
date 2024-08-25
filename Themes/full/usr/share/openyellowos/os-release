@@ -1,9 +1,0 @@
-PRETTY_NAME="open.Yellow.os 24.08 (Freesia)"
-NAME="open.Yellow.os"
-VERSION_ID="24.08"
-VERSION="24.08 (Freesia)"
-VERSION_CODENAME=bookworm
-ID=debian
-ID_LIKE=debian
-HOME_URL="https://openyellowos.com/"
-BUG_REPORT_URL="https://github.com/openyellowos/open-Yellow-os/"
